@@ -1,5 +1,7 @@
+import {ElmtType} from "@/utils/selection";
+import {ElmtType} from "@/utils/selection";
 <template>
-    <g class="cable" v-bind:class="{selected: isSelected}" v-on:click="eventHandler()">
+    <g class="cable" v-bind:class="{selected: isSelected(this.selection)}" v-on:click="eventHandler()">
         <title>Load: {{uLoads()}}</title>
         <title>Load: </title>
         <line :x1=line1.x1 :y1=line1.y1 :x2=line1.x2 :y2=line1.y2 stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
@@ -13,36 +15,32 @@
     import {Component, Prop, Vue} from "vue-property-decorator";
     import {Circle, Line} from "@/utils/SvgTypes"
     import {namespace} from "vuex-class";
-    import {Selection, ElmtType} from "@/utils/selection";
+    import {ElmtType, Selection} from "@/utils/selection";
     import {Cable} from "@/utils/grid";
 
-    const inspState = namespace('InspectorState');
+    import {useSelectionCompo} from "@/composition/selectionComposition";
+
     const gridState = namespace('GridSCState');
 
-    @Component
+    @Component({
+        setup: useSelectionCompo
+    })
     export default class SimpleCable extends Vue{
         @Prop() id!: number;
         @Prop() line1!: Line;
         @Prop() line2!: Line;
         @Prop() circle!: Circle;
 
-        @inspState.Mutation
-        public select!: (elmt: Selection) => void;
-
-        @inspState.State
-        public  selectedElement!: Selection;
+        // Defined in useSelectionCompo
+        public changeSelection!: (elmt: Selection) => void;
+        public selection: Selection = new Selection(this.id, ElmtType.Cable);
 
         @gridState.State
         public allCables!: Array<Cable>;
 
-        public selection: Selection = new Selection(this.id, ElmtType.Cable);
-
-        get isSelected(): boolean {
-            return this.selection.equals(this.selectedElement);
-        }
 
         public eventHandler(): void {
-            this.select(this.selection);
+            this.changeSelection(this.selection);
         }
 
         public uLoads(): string {

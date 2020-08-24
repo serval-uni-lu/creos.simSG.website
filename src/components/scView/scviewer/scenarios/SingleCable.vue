@@ -1,3 +1,4 @@
+import {ElmtType} from "@/utils/selection";
 <template>
     <svg viewBox="587 193 222 199">
         <defs>
@@ -41,12 +42,13 @@
     import {Component, Vue} from "vue-property-decorator";
     import FuseVue from "@/components/scView/scviewer/sg-elements/FuseVue.vue";
     import SimpleCable from "@/components/scView/scviewer/sg-elements/SimpleCable.vue";
-    import {Line, Circle, Point} from "@/utils/SvgTypes"
+    import {Circle, Line, Point} from "@/utils/SvgTypes"
     import HiddenSimpleCable from "@/components/scView/scviewer/sg-elements/HiddenSimpleCable.vue";
     import Meter from "@/components/scView/scviewer/sg-elements/Meter.vue";
     import InfoLayerSimpleCable from "@/components/scView/scviewer/infoLayer/InfoLayerSimpleCable.vue";
     import InfoLayerFuse from "@/components/scView/scviewer/infoLayer/InfoLayerFuse.vue";
     import {namespace} from "vuex-class";
+    import {ElmtType} from "@/utils/selection";
 
     const gridState = namespace('GridSCState');
 
@@ -65,6 +67,8 @@
 
         @gridState.Mutation
         public init!: (nbFuses: number) => void;
+
+        public c: ElmtType = ElmtType.Cable;
 
         public created() {
             this.init(2);

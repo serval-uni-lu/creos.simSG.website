@@ -1,6 +1,7 @@
 <template lang="pug">
     section
-        h2 {{title}}
+        h2(v-on:mousedown="double()") {{title}}
+        p {{value}}
 
         div#viewer
             Action#action
@@ -16,9 +17,11 @@
     import Action from "@/components/scView/Action.vue";
     import Inspector from "@/components/scView/Inspector.vue";
     import SCViewer from "@/components/scView/SCViewer.vue";
+    import {myComposition} from "@/utils/testComposition";
 
     @Component({
-        components: {SCViewer, Action, Inspector}
+        components: {SCViewer, Action, Inspector},
+        setup: myComposition,
     })
     export default class SCView extends Vue {
         @Prop() name!: string;
