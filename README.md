@@ -1,7 +1,5 @@
 # SimSG-Website
 
-a
-
 ## Project setup
 ```
 npm install
