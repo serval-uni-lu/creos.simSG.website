@@ -75,6 +75,8 @@ export class Fuse {
 export class Cable {
     public uLoads: Array<ULoad> = Array<ULoad>();
     public consumption = 0.;
+    public fuse1!: Fuse;
+    public fuse2!: Fuse;
 }
 
 export class ULoad {
@@ -94,6 +96,23 @@ export class ULoad {
     public prettyConf(): string {
         return this.confidence.prettyConf();
     }
+}
+
+export interface Location {
+    latitude: number;
+    longitude: number;
+}
+
+export enum EntityType {
+    SUBSTATION = "Substation",
+    CABINET = "Cabinet"
+}
+
+export interface Entity {
+    name: string;
+    location: Location;
+    type: EntityType;
+    fuses: Map<number, Fuse>;
 }
 
 
