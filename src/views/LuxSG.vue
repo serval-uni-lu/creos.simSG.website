@@ -1,3 +1,4 @@
+import {ElmtType} from "@/utils/selection";
 <template lang="pug">
     section
         h2 Real-case scenario: Reckange disctrict (Mersch, Luxembourg)
@@ -5,19 +6,25 @@
         .container
             Action#action
             #lg-map
+            Inspector#inspector(v-if="inspVisible")
+
 
 </template>
 
 <script lang="ts">
     import {Component, Vue} from "vue-property-decorator";
-    import L, {LatLngLiteral, TileLayer} from 'leaflet';
+    import L, {LatLngExpression, LatLngLiteral, LeafletMouseEvent, PolylineOptions, TileLayer} from 'leaflet';
     import Action from "@/components/Action.vue";
     import json from "@/assets/grids/real-case.json";
     import {namespace} from "vuex-class";
     import {Cable, Entity, GridJson, Location} from "@/utils/sg-json.types";
     import {EntityType} from "@/utils/grid";
+    import Inspector from "@/components/inspector/Inspector.vue";
+    import {ElmtType, NullSelection, Selection} from "@/utils/selection";
 
     const gridSCState = namespace('GridState');
+    const inspectorState = namespace('InspectorState');
+
 
     const logoSize = 25;
     const iconSubs = L.icon({
@@ -100,13 +107,38 @@
             }
         });
 
-        // return paths.values();
         return res;
+    }
+
+    class DataMarker extends L.Marker {
+        data: any;
+
+        constructor(latLng: L.LatLngExpression, data: any, options?: L.MarkerOptions) {
+            super(latLng, options);
+            this.setData(data);
+        }
+
+        getData() {
+            return this.data;
+        }
+
+        setData(data: any) {
+            this.data = data;
+        }
+    }
+
+    class DataPolyLine extends L.Polyline {
+        data: any;
+
+        constructor(latlngs: LatLngExpression[] | LatLngExpression[][], data: any, options?: PolylineOptions) {
+            super(latlngs, options);
+            this.data = data;
+        }
     }
 
 
     @Component({
-        components: {Action}
+        components: {Inspector, Action}
     })
     export default class LuxSG extends Vue {
         @gridSCState.State
@@ -115,14 +147,28 @@
         @gridSCState.Mutation
         public init!: (json: GridJson) => void;
 
+        @inspectorState.State
+        public selectedElement!: Selection;
+
+        @inspectorState.Mutation
+        public select!: (elmt: Selection) => void;
 
         public map!: L.Map;
         public tileLayers!: TileLayer;
         public layers!: Array<object>;
 
+        get inspVisible(): boolean {
+            return !this.selectedElement.equals(NullSelection);
+        }
+
 
         public created() {
             this.init(json as GridJson);
+        }
+
+        public handleEvenOnMap(e: LeafletMouseEvent) {
+            this.select(new Selection(0, ElmtType.Fuse));
+            console.log(e.target.data)
         }
 
         public mounted() {
@@ -141,12 +187,19 @@
             this.grid.entities.forEach((ent: Entity) => {
                 if(ent.location !== undefined) {
                     const icon = (ent.type.toLowerCase() === EntityType.CABINET.toLowerCase())? iconCabinet : iconSubs;
-                    L.marker([ent.location.lat, ent.location.long], {icon: icon}).addTo(this.map);
+                    // L.marker([ent.location.lat, ent.location.long], {icon: icon}).addTo(this.map);
+
+                    const marker = new DataMarker([ent.location.lat, ent.location.long], "YouPi!", {
+                        icon: icon
+                    });
+                    marker.addTo(this.map);
+                    marker.on("click", event => {
+                        console.log(event.target);
+                    });
                 }
             });
 
-
-
+            // this.map.on("click", this.handleEvenOnMap);
 
             for(const line of getLines(this.grid)) {
                 const geoLine: LatLngLiteral[] = [
@@ -154,9 +207,16 @@
                     {lat: line.point2.lat, lng: line.point2.long}
                 ];
 
-                L.polyline(geoLine, {
+                // L.polyline(geoLine, {
+                //     color: 'black'
+                // }).addTo(this.map);
+                const l = new DataPolyLine(geoLine, "Oh oui!", {
                     color: 'black'
-                }).addTo(this.map);
+                });
+                l.addTo(this.map);
+                l.on('click', event => {
+                    console.log(event.target)
+                })
             }
 
         }
@@ -167,7 +227,7 @@
 <style lang="scss" scoped>
     $size-side-elmt: 19%;
     $margin: 1%;
-    $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 1);
+    $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 2);
     $color: lightgrey;
 
     section {
@@ -193,6 +253,15 @@
     #lg-map {
         width: $remaining;
         margin: 0 $margin $margin;
+    }
+
+    #inspector {
+        width: $size-side-elmt;
+        box-shadow: 10px 10px 16px darkgray;
+        background-color: $color;
+        margin-bottom: $margin;
+        margin-right: $margin;
+        position: relative;
     }
 
 </style>
