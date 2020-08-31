@@ -10,6 +10,7 @@
     import {namespace} from "vuex-class";
     import {Selection} from "@/utils/selection";
     import {Grid} from "@/ts/grid";
+    import {UpdateConsData} from "@/store/modules/grid-state";
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace('GridState');
@@ -23,32 +24,15 @@
         @gridState.State
         public grid!: Grid;
 
-        @gridState.State
-        public meters!: Array<number>;
-
         @gridState.Mutation
-        public updateMeterCons!: (id: number, newCons: number) => void;
-
-        // get meter(): Meter {
-        //     return this.meters[this.selectedElement.id];
-        //     // return this.grid.getMeter(this.selectedElement.id);
-        // }
+        public updateMeterCons!: (data: UpdateConsData) => void;
 
         get consumption(): number {
-            // return this.meters[this.selectedElement.id].consumption;
-            return this.meters[this.selectedElement.id];
+            return this.grid.getMeter(this.selectedElement.id).consumption;
         }
 
         set consumption(newCons: number) {
-            console.log(newCons);
-            // this.meters[this.selectedElement.id] = newCons;
-            // console.log(this.meters);
-            // console.log(this.selectedElement.id);
-           // this.meter.consumption = newCons;
-           // console.log("1");
-           // Vue.set(this.grid.meters, this.selectedElement.id, new Meter(this.meter.name, newCons));
-            this.updateMeterCons(this.selectedElement.id, newCons);
-            this.$forceUpdate();
+            this.updateMeterCons({id: this.selectedElement.id, newCons: newCons});
         }
     }
 </script>

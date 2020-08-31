@@ -3,7 +3,7 @@
         <rect :x="location.x" :y="location.y" width="37" height="27.04319" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
         <circle :cx="cX" :cy="cY" r="7.37542706758215" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
         <text :transform="translate" fill="black">
-            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="5.206" y="11">{{meters[id]}} A</tspan>
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="5.206" y="11">{{consumption}} A</tspan>
         </text>
         <line :x1="x" :y1="location.y" :x2="x" :y2="y2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
     </g>
@@ -27,11 +27,8 @@
         @inspState.State
         public selectedElement!: Selection;
 
-        // @gridState.State
-        // public grid!: Grid;
-
         @gridState.State
-        public meters!: Array<number>;
+        public grid!: Grid;
 
         @inspState.Mutation
         public select!: (elmt: Selection) => void;
@@ -63,14 +60,10 @@
         }
 
         get consumption(): number {
-            // return this.grid.getMeter(this.id).consumption;
-            console.log("MeterVue ");
-            console.log(this.meters);
-            return this.meters[this.id];
+            return this.grid.getMeter(this.id).consumption;
         }
 
         public eventHandler(): void {
-            console.log(this.meters);
             this.select(this.selection);
         }
 
