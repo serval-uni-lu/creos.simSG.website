@@ -1,3 +1,4 @@
+import {Scenario} from "@/ts/scenario";
 import {CableType} from "@/utils/SvgTypes";
 import {CableType} from "@/utils/SvgTypes";
 import {CableType} from "@/utils/SvgTypes";
@@ -26,9 +27,9 @@ import {CableType} from "@/utils/SvgTypes";
                 <circle cx="316.7441" cy="385" r="7.00001118531326" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white" stroke="black"/>
                 <circle cx="217.82796" cy="385" r="7.00001118531327" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
             </g>
-            <Meter :id=0 :location=locMeter0 />
-            <Meter :id=1 :location=locMeter1 />
-            <Meter :id=2 :location=locMeter2 />
+            <MeterVue :id=0 :location=locMeter0 />
+            <MeterVue :id=1 :location=locMeter1 />
+            <MeterVue :id=2 :location=locMeter2 />
             <g id="Cabinet">
                 <rect x="238.2441" y="257.4163" width="71" height="32" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
                 <text transform="translate(309.2441 266.2483)" fill="black">
@@ -67,14 +68,15 @@ import {CableType} from "@/utils/SvgTypes";
     import {namespace} from "vuex-class";
     import FuseVue from "@/components/scView/scviewer/sg-elements/FuseVue.vue";
     import InfoLayerFuse from "@/components/scView/scviewer/infoLayer/InfoLayerFuse.vue";
-    import {CableType, ComplexCableInfo, Point, SimpleCableInfo} from "@/utils/SvgTypes";
-    import Meter from "@/components/scView/scviewer/sg-elements/Meter.vue";
+    import {CableType, ComplexCableInfo, Point, SimpleCableInfo} from "@/utils/svg-types";
+    import MeterVue from "@/components/scView/scviewer/sg-elements/MeterVue.vue";
     import CableVue from "@/components/scView/scviewer/sg-elements/CableVue.vue";
     import InfoLayerCable from "@/components/scView/scviewer/infoLayer/InfoLayerCable.vue";
+    import {Scenario} from "@/ts/scenario";
 
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
     @Component({
-        components: {InfoLayerCable, CableVue, Meter, InfoLayerFuse, FuseVue}
+        components: {InfoLayerCable, CableVue, MeterVue, InfoLayerFuse, FuseVue}
     })
     export default class Cabinet extends Vue {
         private locFuse0: Point = {x: 268.7441, y: 139.77368};
@@ -112,10 +114,10 @@ import {CableType} from "@/utils/SvgTypes";
 
 
         @gridState.Mutation
-        public init!: (nbFuses: number) => void;
+        public initFromScenario!: (scenario: Scenario) => void;
 
         public created() {
-            this.init(6);
+            this.initFromScenario(Scenario.CABINET);
         }
 
     }

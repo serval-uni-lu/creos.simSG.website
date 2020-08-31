@@ -15,7 +15,7 @@
     import ToolBar from "@/components/scView/scviewer/ToolBar.vue";
     import SingleCable from "@/components/scView/scviewer/scenarios/SingleCable.vue";
     import Cabinet from "@/components/scView/scviewer/scenarios/Cabinet.vue";
-    import {Point} from "@/utils/SvgTypes";
+    import {Point} from "@/utils/svg-types";
     import {namespace} from "vuex-class";
     import ParaSubs from "@/components/scView/scviewer/scenarios/ParaSubs.vue";
     import ParaCabinet from "@/components/scView/scviewer/scenarios/ParaCabinet.vue";

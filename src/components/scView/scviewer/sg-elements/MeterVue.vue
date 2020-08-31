@@ -3,7 +3,7 @@
         <rect :x="location.x" :y="location.y" width="37" height="27.04319" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
         <circle :cx="cX" :cy="cY" r="7.37542706758215" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
         <text :transform="translate" fill="black">
-            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="5.206" y="11">{{consumption}} A</tspan>
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" fill="black" x="5.206" y="11">{{meters[id]}} A</tspan>
         </text>
         <line :x1="x" :y1="location.y" :x2="x" :y2="y2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
     </g>
@@ -11,24 +11,27 @@
 
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
-    import {Point} from "@/utils/SvgTypes";
+    import {Point} from "@/utils/svg-types";
     import {Selection, ElmtType} from "@/utils/selection";
     import {namespace} from "vuex-class";
-    import {Cable} from "@/utils/grid";
+    import {Grid} from "@/ts/grid";
 
     const inspState = namespace('InspectorState');
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component
-    export default class Meter extends Vue {
+    export default class MeterVue extends Vue {
         @Prop() id!: number;
         @Prop() location!: Point;
 
         @inspState.State
         public selectedElement!: Selection;
 
+        // @gridState.State
+        // public grid!: Grid;
+
         @gridState.State
-        public allCables!: Array<Cable>;
+        public meters!: Array<number>;
 
         @inspState.Mutation
         public select!: (elmt: Selection) => void;
@@ -60,10 +63,14 @@
         }
 
         get consumption(): number {
-            return this.allCables[this.id].consumption;
+            // return this.grid.getMeter(this.id).consumption;
+            console.log("MeterVue ");
+            console.log(this.meters);
+            return this.meters[this.id];
         }
 
         public eventHandler(): void {
+            console.log(this.meters);
             this.select(this.selection);
         }
 

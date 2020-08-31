@@ -28,14 +28,14 @@ import {CableType} from "@/utils/SvgTypes";
 
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
-    import {CableInfo, CableType, ComplexCableInfo, OneLineCableInfo, SimpleCableInfo} from "@/utils/SvgTypes"
+    import {CableInfo, CableType, ComplexCableInfo, OneLineCableInfo, SimpleCableInfo} from "@/utils/svg-types"
     import {namespace} from "vuex-class";
     import {ElmtType, Selection} from "@/utils/selection";
-    import {Cable} from "@/utils/grid";
     import {prettyStr} from "@/utils/uLoadsUtils";
+    import {Grid} from "@/ts/grid";
 
     const inspState = namespace('InspectorState');
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component
     export default class SimpleCable extends Vue{
@@ -50,7 +50,7 @@ import {CableType} from "@/utils/SvgTypes";
         public  selectedElement!: Selection;
 
         @gridState.State
-        public allCables!: Array<Cable>;
+        public grid!: Grid;
 
         public selection: Selection = new Selection(this.id, ElmtType.Cable);
 
@@ -87,7 +87,7 @@ import {CableType} from "@/utils/SvgTypes";
         }
 
         public uLoads(): string {
-            return prettyStr(this.allCables[this.id].uLoads);
+            return prettyStr(this.grid.getCable(this.id).uLoads);
         }
     }
 </script>

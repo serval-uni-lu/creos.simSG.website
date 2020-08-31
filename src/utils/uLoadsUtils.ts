@@ -1,5 +1,4 @@
-import {ULoad} from "@/utils/grid";
-import {getYText} from "@/utils/infoLayerUtils";
+import {ULoad} from "@/ts/grid";
 
 export function prettyStr(uLoads: Array<ULoad>): string {
     if(uLoads.length == 0) {

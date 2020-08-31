@@ -1,5 +1,5 @@
-import {ULoad} from "@/utils/grid";
 import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
+import {ULoad} from "@/ts/grid";
 
 const MARGIN_TOP = 5;
 const LINE_HEIGHT = 10;
@@ -19,38 +19,6 @@ export function uLoadsDataWithY(uloads: Array<ULoad>, nbLineInTemplate: number):
         value.y = getYText(nbLineInTemplate, nbLineInTemplate + index);
     });
     return res;
-
-
-    // if (uloads.length === 0) {
-    //     const res: ULoadInfo = {
-    //         id: 0,
-    //         value: "TBD",
-    //         confidence: "TBD"
-    //     };
-    //
-    //     if (nbLineInTemplate !== undefined) {
-    //         res.y = getYText(nbLineInTemplate, nbLineInTemplate);
-    //     }
-    //
-    //     return [res];
-    // }
-    //
-    // const result = Array<ULoadInfo>();
-    // for (let ul = 0; ul < uloads.length; ul++) {
-    //     const toAdd: ULoadInfo = {
-    //         id: ul,
-    //         value: uloads[ul].prettyLoad(),
-    //         confidence: uloads[ul].prettyConf()
-    //     };
-    //
-    //     if (nbLineInTemplate !== undefined) {
-    //         toAdd.y = getYText(nbLineInTemplate, nbLineInTemplate + ul);
-    //     }
-    //
-    //     result.push(toAdd);
-    // }
-    //
-    // return result;
 }
 
 

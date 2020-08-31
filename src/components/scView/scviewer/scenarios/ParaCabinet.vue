@@ -1,7 +1,6 @@
-import {CableType} from "@/utils/SvgTypes";
-import {CableType} from "@/utils/SvgTypes";
-import {CableType} from "@/utils/SvgTypes";
-import {CableType} from "@/utils/SvgTypes";
+import {Scenario} from "@/ts/scenario";
+import {CableType} from "@/utils/svg-types";
+import {CableType} from "@/utils/svg-types";
 <template>
     <svg viewBox="750 437 333 401">
         <defs>
@@ -47,10 +46,10 @@ import {CableType} from "@/utils/SvgTypes";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="1.4260004" y="11">Substation</tspan>
                 </text>
             </g>
-            <Meter :id=0 :location=locMeter0 />
-            <Meter :id=1 :location=locMeter1 />
-            <Meter :id=2 :location=locMeter2 />
-            <Meter :id=3 :location=locMeter3 />
+            <MeterVue :id=0 :location=locMeter0 />
+            <MeterVue :id=1 :location=locMeter1 />
+            <MeterVue :id=2 :location=locMeter2 />
+            <MeterVue :id=3 :location=locMeter3 />
             <FuseVue :id=0 :location=locFuse0 />
             <FuseVue :id=1 :location=locFuse1 />
             <FuseVue :id=2 :location=locFuse2 :displayLeft="'left'" />
@@ -78,21 +77,19 @@ import {CableType} from "@/utils/SvgTypes";
 <script lang="ts">
     import {Component, Vue} from "vue-property-decorator";
     import {namespace} from "vuex-class";
-    import {CableType, ComplexCableInfo, Point, SimpleCableInfo} from "@/utils/SvgTypes";
+    import {CableType, ComplexCableInfo, Point, SimpleCableInfo} from "@/utils/svg-types";
     import CableVue from "@/components/scView/scviewer/sg-elements/CableVue.vue";
     import FuseVue from "@/components/scView/scviewer/sg-elements/FuseVue.vue";
-    import Meter from "@/components/scView/scviewer/sg-elements/Meter.vue";
+    import MeterVue from "@/components/scView/scviewer/sg-elements/MeterVue.vue";
     import InfoLayerFuse from "@/components/scView/scviewer/infoLayer/InfoLayerFuse.vue";
     import InfoLayerCable from "@/components/scView/scviewer/infoLayer/InfoLayerCable.vue";
+    import {Scenario} from "@/ts/scenario";
 
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
     @Component({
-        components: {InfoLayerCable, InfoLayerFuse, FuseVue, CableVue, Meter}
+        components: {InfoLayerCable, InfoLayerFuse, FuseVue, CableVue, MeterVue}
     })
     export default class ParaCabinet extends Vue{
-        @gridState.Mutation
-        public init!: (nbFuses: number) => void;
-
         private locFuse0: Point = {x:906.9337, y:495.3649};
         private locFuse1: Point = {x:907.3112, y:567.6995};
         private locFuse2: Point = {x:884.5, y:619.33994  };
@@ -135,9 +132,11 @@ import {CableType} from "@/utils/SvgTypes";
             type: CableType.Simple
         };
 
+        @gridState.Mutation
+        public initFromScenario!: (scenario: Scenario) => void;
 
         public created() {
-            this.init(8);
+            this.initFromScenario(Scenario.PARA_CABINET);
         }
 
     }

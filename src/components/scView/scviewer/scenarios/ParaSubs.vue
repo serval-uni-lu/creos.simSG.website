@@ -1,3 +1,4 @@
+import {Scenario} from "@/ts/scenario";
 import {CableType} from "@/utils/SvgTypes";
 import {CableType} from "@/utils/SvgTypes";
 import {CableType} from "@/utils/SvgTypes";
@@ -43,9 +44,9 @@ import {CableType} from "@/utils/SvgTypes";
             <CableVue :id=0 :info=c0_info :isSimple=false />
             <CableVue :id=1 :info=c1_info :isSimple=false />
             <CableVue :id=2 :info=c2_info :isSimple=true />
-            <Meter :id=0 :location=locMeter0 />
-            <Meter :id=1 :location=locMeter1 />
-            <Meter :id=2 :location=locMeter2 />
+            <MeterVue :id=0 :location=locMeter0 />
+            <MeterVue :id=1 :location=locMeter1 />
+            <MeterVue :id=2 :location=locMeter2 />
             <FuseVue :id=0 :location=locFuse0 :displayLeft="'left'" />
             <FuseVue :id=1 :location=locFuse1 :displayLeft="'left'" />
             <FuseVue :id=2 :location=locFuse2 />
@@ -70,21 +71,19 @@ import {CableType} from "@/utils/SvgTypes";
     import {Component, Vue} from "vue-property-decorator";
     import InfoLayerCable from "../infoLayer/InfoLayerCable.vue";
     import CableVue from "../sg-elements/CableVue.vue";
-    import Meter from "../sg-elements/Meter.vue";
     import InfoLayerFuse from "../infoLayer/InfoLayerFuse.vue";
     import FuseVue from "../sg-elements/FuseVue.vue";
     import {namespace} from "vuex-class";
-    import {CableType, ComplexCableInfo, Point, SimpleCableInfo} from "@/utils/SvgTypes";
+    import {CableType, ComplexCableInfo, Point, SimpleCableInfo} from "@/utils/svg-types";
+    import {Scenario} from "@/ts/scenario";
+    import MeterVue from "@/components/scView/scviewer/sg-elements/MeterVue.vue";
 
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component({
-        components: {InfoLayerCable, CableVue, Meter, InfoLayerFuse, FuseVue}
+        components: {InfoLayerCable, CableVue, MeterVue, InfoLayerFuse, FuseVue}
     })
     export default class ParaSubs extends Vue {
-        @gridState.Mutation
-        public init!: (nbFuses: number) => void;
-
         private locFuse0: Point = {x: 886.5825, y: 490.45385};
         private locFuse1: Point = {x: 886.5825, y: 567.05556};
         private locFuse2: Point = {x: 926.8821, y: 490.34056};
@@ -117,8 +116,11 @@ import {CableType} from "@/utils/SvgTypes";
             type: CableType.Simple
         };
 
+        @gridState.Mutation
+        public initFromScenario!: (scenario: Scenario) => void;
+
         public created() {
-            this.init(6);
+            this.initFromScenario(Scenario.PARA_SUBS);
         }
     }
 

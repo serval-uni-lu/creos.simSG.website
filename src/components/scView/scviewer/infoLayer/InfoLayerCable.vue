@@ -12,12 +12,12 @@
 
     import {Component, Vue, Prop} from "vue-property-decorator";
     import {namespace} from "vuex-class";
-    import {Cable} from "@/utils/grid";
     import {getYText, layerHeight, uLoadsDataWithY} from "@/utils/infoLayerUtils";
     import {ULoadInfo} from "@/utils/uLoadsUtils";
+    import {Cable, Grid} from "@/ts/grid";
 
     const toolbarState = namespace('ToolBarState');
-    const gridSCState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component
     export default class InfoCableLayer extends Vue {
@@ -31,8 +31,8 @@
         @toolbarState.State
         public cableLayerVisible!: boolean;
 
-        @gridSCState.State
-        public allCables!: Array<Cable>;
+        @gridState.State
+        public grid!: Grid;
 
         get visibility(): string {
             return this.cableLayerVisible ? "visible" : "hidden";
@@ -44,9 +44,12 @@
             return "translate(" + realX + " " + realY + ")";
         }
 
+        get cable(): Cable {
+            return this.grid.getCable(this.cableId);
+        }
+
         get height(): number {
-            const cable: Cable = this.allCables[this.cableId];
-            return layerHeight(InfoCableLayer.nbTextLineInTemplate, cable.uLoads.length);
+            return layerHeight(InfoCableLayer.nbTextLineInTemplate, this.cable.uLoads.length);
         }
 
         public getYText(posElmt: number): number {
@@ -54,8 +57,7 @@
         }
 
         public uLoads(): Array<ULoadInfo> {
-            const cable: Cable = this.allCables[this.cableId];
-            return uLoadsDataWithY(cable.uLoads, InfoCableLayer.nbTextLineInTemplate);
+            return uLoadsDataWithY(this.cable.uLoads, InfoCableLayer.nbTextLineInTemplate);
         }
 
 

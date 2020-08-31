@@ -10,13 +10,13 @@
 
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
-    import {Fuse} from "@/utils/grid";
     import {namespace} from "vuex-class";
     import {ElmtType, Selection} from "@/utils/selection";
     import {prettyStr} from "@/utils/uLoadsUtils";
-    import {Point} from "@/utils/SvgTypes";
+    import {Point} from "@/utils/svg-types";
+    import {Fuse, Grid} from "@/ts/grid";
 
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
     const inspState = namespace('InspectorState');
 
     @Component
@@ -38,7 +38,7 @@
         public selection: Selection = new Selection(this.id, ElmtType.Fuse)
 
         @gridState.State
-        public allFuses!: Array<Fuse>;
+        public grid!: Grid;
 
         @gridState.Mutation
         public switchFuse!: (id: number) => void;
@@ -74,7 +74,7 @@
         }
 
         get fuse(): Fuse {
-            return this.allFuses[this.id];
+            return this.grid.getFuse(this.id);
         }
 
         get status(): string {

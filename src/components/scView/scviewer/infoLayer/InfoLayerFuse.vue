@@ -12,15 +12,15 @@
 
 <script lang="ts">
     import {Component, Vue, Prop} from "vue-property-decorator";
-    import {Point} from "@/utils/SvgTypes";
+    import {Point} from "@/utils/svg-types";
     import {namespace} from "vuex-class";
-    import {Fuse} from "@/utils/grid";
     import {getYText, layerHeight, uLoadsDataWithY} from "@/utils/infoLayerUtils";
     import {ULoadInfo} from "@/utils/uLoadsUtils";
+    import {Fuse, Grid} from "@/ts/grid";
 
 
     const toolbarState = namespace('ToolBarState');
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component
     export default class InfoLayerFuse extends Vue{
@@ -34,7 +34,7 @@
         public fuseLayerVisible!: boolean;
 
         @gridState.State
-        public allFuses!: Array<Fuse>;
+        public grid!: Grid;
 
         get visibility(): string {
             return (this.fuseLayerVisible)? "visible": "hidden";
@@ -52,7 +52,7 @@
 
 
         get fuse(): Fuse {
-            return this.allFuses[this.id];
+            return this.grid.getFuse(this.id);
         }
 
         get status(): string {

@@ -17,12 +17,12 @@ import {ElmtType} from "@/utils/selection";
     import Action from "@/components/Action.vue";
     import json from "@/assets/grids/real-case.json";
     import {namespace} from "vuex-class";
-    import {Cable, Entity, GridJson, Location} from "@/utils/sg-json.types";
-    import {EntityType} from "@/utils/grid";
+    import {CableJson, EntityJson, GridJson, LocationJson} from "@/types/sg-json.types";
     import Inspector from "@/components/inspector/Inspector.vue";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
+    import {Entity, Grid} from "@/ts/grid";
 
-    const gridSCState = namespace('GridState');
+    const gridState = namespace('GridState');
     const inspectorState = namespace('InspectorState');
 
 
@@ -52,62 +52,63 @@ import {ElmtType} from "@/utils/selection";
 
     function getLines(grid: GridJson): Array<Path> {
 
-        // Build a map: fuseId -> Entity
-        const mapOwner = new Map<number, Entity>();
-        grid.entities.forEach((ent: Entity) => {
-           ent.fuses.forEach((fuseId: number) => {
-               mapOwner.set(fuseId, ent);
-           })
-        });
-
-        // Build a map: [Entity, Entity] -> [Path, number]
-        const paths = new Map<string, [Path, number]>();
-        grid.cables.forEach((cable: Cable) => {
-            const owner1 = mapOwner.get(cable.fuses[0]) as Entity;
-            const owner2 = mapOwner.get(cable.fuses[1]) as Entity;
-
-            if(owner1.location !== undefined && owner2.location !== undefined) {
-                const key = mapPathKey(owner1, owner2);
-                if(paths.has(key)) {
-                    (paths.get(key) as [Path, number])[1]++;
-                } else {
-                    paths.set(key, [{point1: owner1.location, point2: owner2.location}, 1]);
-                }
-            }
-        });
-
-        //from the map, create the final array
-        const res = Array<Path>();
-        paths.forEach((path: [Path, number]) => {
-            if(path[1] === 1) {
-                res.push(path[0])
-            } else {
-                const middle = Math.floor(path[1] / 2);
-                for(let id=0; id<middle; id++) {
-                    const newP: Path = {
-                        point1: {...path[0].point1},
-                        point2: {...path[0].point2}
-                    };
-                    const offset = (id + 1) * epsilon;
-                    newP.point1.lat += offset;
-                    newP.point2.lat += offset;
-                    res.push(newP);
-                }
-
-                for(let id=middle; id<path[1]; id++) {
-                    const newP: Path = {
-                        point1: {...path[0].point1},
-                        point2: {...path[0].point2}
-                    };
-                    const offset = (id - middle + 1) * epsilon;
-                    newP.point1.lat -= offset;
-                    newP.point2.lat -= offset;
-                    res.push(newP);
-                }
-            }
-        });
-
-        return res;
+        // // Build a map: fuseId -> Entity
+        // const mapOwner = new Map<number, Entity>();
+        // grid.entities.forEach((ent: Entity) => {
+        //    ent.fuses.forEach((fuseId: number) => {
+        //        mapOwner.set(fuseId, ent);
+        //    })
+        // });
+        //
+        // // Build a map: [Entity, Entity] -> [Path, number]
+        // const paths = new Map<string, [Path, number]>();
+        // grid.cables.forEach((cable: Cable) => {
+        //     const owner1 = mapOwner.get(cable.fuses[0]) as Entity;
+        //     const owner2 = mapOwner.get(cable.fuses[1]) as Entity;
+        //
+        //     if(owner1.location !== undefined && owner2.location !== undefined) {
+        //         const key = mapPathKey(owner1, owner2);
+        //         if(paths.has(key)) {
+        //             (paths.get(key) as [Path, number])[1]++;
+        //         } else {
+        //             paths.set(key, [{point1: owner1.location, point2: owner2.location}, 1]);
+        //         }
+        //     }
+        // });
+        //
+        // //from the map, create the final array
+        // const res = Array<Path>();
+        // paths.forEach((path: [Path, number]) => {
+        //     if(path[1] === 1) {
+        //         res.push(path[0])
+        //     } else {
+        //         const middle = Math.floor(path[1] / 2);
+        //         for(let id=0; id<middle; id++) {
+        //             const newP: Path = {
+        //                 point1: {...path[0].point1},
+        //                 point2: {...path[0].point2}
+        //             };
+        //             const offset = (id + 1) * epsilon;
+        //             newP.point1.lat += offset;
+        //             newP.point2.lat += offset;
+        //             res.push(newP);
+        //         }
+        //
+        //         for(let id=middle; id<path[1]; id++) {
+        //             const newP: Path = {
+        //                 point1: {...path[0].point1},
+        //                 point2: {...path[0].point2}
+        //             };
+        //             const offset = (id - middle + 1) * epsilon;
+        //             newP.point1.lat -= offset;
+        //             newP.point2.lat -= offset;
+        //             res.push(newP);
+        //         }
+        //     }
+        // });
+        //
+        // return res;
+        return [];
     }
 
     class DataMarker extends L.Marker {
@@ -141,10 +142,10 @@ import {ElmtType} from "@/utils/selection";
         components: {Inspector, Action}
     })
     export default class LuxSG extends Vue {
-        @gridSCState.State
-        public grid!: GridJson;
+        @gridState.State
+        public grid!: Grid;
 
-        @gridSCState.Mutation
+        @gridState.Mutation
         public init!: (json: GridJson) => void;
 
         @inspectorState.State
@@ -184,40 +185,40 @@ import {ElmtType} from "@/utils/selection";
             this.tileLayers.addTo(this.map);
 
 
-            this.grid.entities.forEach((ent: Entity) => {
-                if(ent.location !== undefined) {
-                    const icon = (ent.type.toLowerCase() === EntityType.CABINET.toLowerCase())? iconCabinet : iconSubs;
-                    // L.marker([ent.location.lat, ent.location.long], {icon: icon}).addTo(this.map);
-
-                    const marker = new DataMarker([ent.location.lat, ent.location.long], "YouPi!", {
-                        icon: icon
-                    });
-                    marker.addTo(this.map);
-                    marker.on("click", event => {
-                        console.log(event.target);
-                    });
-                }
-            });
+            // this.grid.entities.forEach((ent: Entity) => {
+            //     if(ent.location !== undefined) {
+            //         const icon = (ent.type.toLowerCase() === EntityType.CABINET.toLowerCase())? iconCabinet : iconSubs;
+            //         // L.marker([ent.location.lat, ent.location.long], {icon: icon}).addTo(this.map);
+            //
+            //         const marker = new DataMarker([ent.location.lat, ent.location.long], "YouPi!", {
+            //             icon: icon
+            //         });
+            //         marker.addTo(this.map);
+            //         marker.on("click", event => {
+            //             console.log(event.target);
+            //         });
+            //     }
+            // });
 
             // this.map.on("click", this.handleEvenOnMap);
 
-            for(const line of getLines(this.grid)) {
-                const geoLine: LatLngLiteral[] = [
-                    {lat: line.point1.lat, lng: line.point1.long},
-                    {lat: line.point2.lat, lng: line.point2.long}
-                ];
-
-                // L.polyline(geoLine, {
-                //     color: 'black'
-                // }).addTo(this.map);
-                const l = new DataPolyLine(geoLine, "Oh oui!", {
-                    color: 'black'
-                });
-                l.addTo(this.map);
-                l.on('click', event => {
-                    console.log(event.target)
-                })
-            }
+            // for(const line of getLines(this.grid)) {
+            //     const geoLine: LatLngLiteral[] = [
+            //         {lat: line.point1.lat, lng: line.point1.long},
+            //         {lat: line.point2.lat, lng: line.point2.long}
+            //     ];
+            //
+            //     // L.polyline(geoLine, {
+            //     //     color: 'black'
+            //     // }).addTo(this.map);
+            //     const l = new DataPolyLine(geoLine, "Oh oui!", {
+            //         color: 'black'
+            //     });
+            //     l.addTo(this.map);
+            //     l.on('click', event => {
+            //         console.log(event.target)
+            //     })
+            // }
 
         }
 

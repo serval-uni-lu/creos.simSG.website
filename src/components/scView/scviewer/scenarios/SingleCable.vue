@@ -1,4 +1,4 @@
-import {CableType} from "@/utils/SvgTypes";
+import {Scenario} from "@/ts/scenario";
 <template>
     <svg viewBox="587 193 222 199">
         <defs>
@@ -25,7 +25,7 @@ import {CableType} from "@/utils/SvgTypes";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="1.4260004" y="11">Substation</tspan>
                 </text>
             </g>
-            <Meter :id=0 :location=meterLoc />
+            <MeterVue :id=0 :location=meterLoc />
             <g id="DeadEnds">
                 <circle cx="694" cy="384" r="7.00001118531325" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
             </g>
@@ -42,20 +42,19 @@ import {CableType} from "@/utils/SvgTypes";
     import {Component, Vue} from "vue-property-decorator";
     import FuseVue from "@/components/scView/scviewer/sg-elements/FuseVue.vue";
     import CableVue from "@/components/scView/scviewer/sg-elements/CableVue.vue";
-    import {CableType, Point, SimpleCableInfo} from "@/utils/SvgTypes"
-    import Meter from "@/components/scView/scviewer/sg-elements/Meter.vue";
+    import {CableType, Point, SimpleCableInfo} from "@/utils/svg-types"
+    import MeterVue from "@/components/scView/scviewer/sg-elements/MeterVue.vue";
     import InfoLayerCable from "@/components/scView/scviewer/infoLayer/InfoLayerCable.vue";
     import InfoLayerFuse from "@/components/scView/scviewer/infoLayer/InfoLayerFuse.vue";
     import {namespace} from "vuex-class";
+    import {Scenario} from "@/ts/scenario";
 
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component({
-        components: {InfoLayerFuse, InfoLayerCable, Meter, FuseVue, CableVue}
+        components: {InfoLayerFuse, InfoLayerCable, MeterVue, FuseVue, CableVue}
     })
     export default class SingleCable extends Vue{
-
-
         private cbl_info: SimpleCableInfo = {
             line1: {x1: 694, y1: 377, x2:694, y2: 242.04},
             line2: {x1: 694, y1: 292, x2:601.5, y2: 292},
@@ -69,10 +68,10 @@ import {CableType} from "@/utils/SvgTypes";
         private infoFuse2: Point = {x: 689, y: 360.3567};
 
         @gridState.Mutation
-        public init!: (nbFuses: number) => void;
+        public initFromScenario!: (scenario: Scenario) => void;
 
         public created() {
-            this.init(2);
+            this.initFromScenario(Scenario.SINGLE_CABLE);
         }
 
     }

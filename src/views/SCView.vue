@@ -50,7 +50,7 @@
 <style lang="scss" scoped>
     $size-side-elmt: 19%;
     $margin: 1%;
-    $remaining: calc(100% - ($margin + $size-side-elmt) * 2);
+    $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 2);
     $margin-bottom: 10px;
     $color: lightgrey;
 

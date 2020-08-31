@@ -1,9 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import ToolBarState from "@/store/modules/sc-viewer/toolbar";
-import GridSCState from "@/store/modules/sc-viewer/grid";
 import InspectorState from "@/store/modules/inspector";
-import GridState from "@/store/modules/grid";
+import GridState from "@/store/modules/grid-state";
 
 Vue.use(Vuex);
 
@@ -15,6 +14,6 @@ export default new Vuex.Store({
   actions: {
   },
   modules: {
-    ToolBarState, GridSCState, InspectorState, GridState
+    ToolBarState, InspectorState, GridState
   }
 })

@@ -25,17 +25,17 @@
 
     import {Component, Vue} from "vue-property-decorator";
     import {namespace} from "vuex-class";
-    import {Fuse} from "@/utils/grid";
     import {Selection} from "@/utils/selection";
     import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
+    import {Fuse, Grid} from "@/ts/grid";
 
     const inspectorState = namespace('InspectorState');
-    const gridState = namespace('GridSCState');
+    const gridState = namespace('GridState');
 
     @Component
     export default class FuseInsp extends Vue{
         @gridState.State
-        public allFuses!: Array<Fuse>;
+        public grid!: Grid;
 
         @gridState.Mutation
         public switchFuse!: (id: number) => void;
@@ -44,7 +44,7 @@
         public selectedElement!: Selection;
 
         get fuse(): Fuse {
-            return this.allFuses[this.selectedElement.id];
+            return this.grid.getFuse(this.selectedElement.id);
         }
 
         get isClosed() {
