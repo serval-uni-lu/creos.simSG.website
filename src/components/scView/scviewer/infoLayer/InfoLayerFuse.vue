@@ -16,7 +16,8 @@
     import {namespace} from "vuex-class";
     import {getYText, layerHeight, uLoadsDataWithY} from "@/utils/infoLayerUtils";
     import {ULoadInfo} from "@/utils/uLoadsUtils";
-    import {Fuse, Grid} from "@/ts/grid";
+    import {ConfidenceLevel, Fuse, Grid, State, ULoad} from "@/ts/grid";
+    import {getFuseState, getFuseStatusConfStr} from "@/store/modules/grid-state";
 
 
     const toolbarState = namespace('ToolBarState');
@@ -33,8 +34,26 @@
         @toolbarState.State
         public fuseLayerVisible!: boolean;
 
+        // @gridState.State
+        // public grid!: Grid;
+
+        // @gridState.Getter
+        // public getFuseState!: (id: number) => State;
+        //
+        // @gridState.Getter
+        // public getFuseStatusConfStr!: (id: number) => string;
+        //
+        // @gridState.Getter
+        // public getFuseULoad!: (id: number) => Array<ULoad>| undefined;
+
         @gridState.State
-        public grid!: Grid;
+        public fuseULoads!: Map<number, Array<ULoad>>;
+
+        @gridState.State
+        public fuseUStatusState!: Map<number, State>;
+
+        @gridState.State
+        public fuseUStatusConf!: Map<number, ConfidenceLevel>;
 
         get visibility(): string {
             return (this.fuseLayerVisible)? "visible": "hidden";
@@ -47,20 +66,24 @@
         }
 
         get height(): number {
-            return layerHeight(InfoLayerFuse.nbTextLineInTemplate, this.fuse.uloads.length);
+            const uloads: Array<ULoad>| undefined = this.fuseULoads.get(this.id);
+            const length = (uloads === undefined)? 1 : uloads.length;
+            return layerHeight(InfoLayerFuse.nbTextLineInTemplate, length);
         }
 
 
-        get fuse(): Fuse {
-            return this.grid.getFuse(this.id);
-        }
+        // get fuse(): Fuse {
+        //     return this.grid.getFuse(this.id);
+        // }
 
         get status(): string {
-            return this.fuse.status.state;
+            return getFuseState(this.fuseUStatusState, this.id);
+            // return this.fuse.status.state;
         }
 
         get confLevel(): string {
-            return this.fuse.status.prettyConf;
+            // return this.fuse.status.prettyConf;
+            return getFuseStatusConfStr(this.fuseUStatusConf, this.id);
         }
 
         public getYText(posElmt: number): number {
@@ -68,7 +91,7 @@
         }
 
         public uLoads(): Array<ULoadInfo> {
-            const uLoads = this.fuse.uloads;
+            const uLoads = this.fuseULoads.get(this.id);
             return uLoadsDataWithY(uLoads, InfoLayerFuse.nbTextLineInTemplate);
         }
 

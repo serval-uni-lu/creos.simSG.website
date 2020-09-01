@@ -1,7 +1,7 @@
 const MAX_CONF_LVL = 1;
 
 interface Identifiable {
-    readonly id: number | string;
+    readonly id: number;
 }
 
 interface Localisable {
@@ -14,39 +14,18 @@ interface Named {
 }
 
 class Grid {
-    cables: Map<number, Cable> | Array<Cable>;
-    fuses: Map<number, Fuse> | Array<Fuse>;
-    meters: Map<number, Meter> | Array<Meter>;
+    cables: Map<number, Cable>;
+    fuses: Map<number, Fuse>;
+    meters: Map<number, Meter>;
     entities?: Map<number, Entity>;
 
 
-    constructor(cables: Map<number, Cable> | Array<Cable>, fuses: Map<number, Fuse> | Array<Fuse>,
-                meters: Map<number, Meter> | Array<Meter>, entities?: Map<number, Entity>) {
+    constructor(cables: Map<number, Cable>, fuses: Map<number, Fuse>, meters: Map<number, Meter>,
+                entities?: Map<number, Entity>) {
         this.cables = cables;
         this.fuses = fuses;
         this.entities = entities;
         this.meters = meters;
-    }
-
-    public getFuse(id: number): Fuse {
-        if(this.fuses instanceof Map) {
-            return this.fuses.get(id) as Fuse;
-        }
-        return this.fuses[id];
-    }
-
-    public getCable(id: number): Cable {
-        if(this.cables instanceof Map) {
-            return this.cables.get(id) as Cable;
-        }
-        return this.cables[id];
-    }
-
-    public getMeter(id: number): Meter {
-        if(this.meters instanceof Map) {
-            return this.meters.get(id) as Meter;
-        }
-        return this.meters[id];
     }
 }
 
@@ -66,10 +45,6 @@ class Cable implements Identifiable, Named {
         this.id = id;
         this.name = (name===undefined)? "Cable " + id : name;
     }
-
-    public get uLoads(): Array<ULoad> {
-        return new Array<ULoad>();
-    }
 }
 
 enum EntityType {
@@ -83,12 +58,12 @@ class Entity implements Identifiable, Localisable, Named {
     latitude: number;
     longitude: number;
     name: string;
-    readonly id: string;
+    readonly id: number;
 
 
-    constructor(type: EntityType, name: string, latitude?: number, longitude?: number) {
+    constructor(id: number, type: EntityType, name: string, latitude?: number, longitude?: number) {
         this.type = type;
-        this.id = name;
+        this.id = id;
         this.name = name;
         this.fuses = new Map<number, Fuse>();
         this.latitude = (latitude === undefined)? -1 : latitude;
@@ -96,25 +71,25 @@ class Entity implements Identifiable, Localisable, Named {
     }
 }
 
-class Meter implements Localisable, Named {
-    consumption: number;
+class Meter implements Identifiable, Localisable, Named {
     latitude: number;
     longitude: number;
     name: string;
+    readonly id: number;
 
-
-    constructor(name: string, consumption?: number, latitude?: number, longitude?: number) {
-        this.consumption = (consumption === undefined)? 0 : consumption;
-        this.latitude = (latitude === undefined)? -1 : latitude;
-        this.longitude = (longitude === undefined)? -1 : longitude;
+    constructor(id: number, name: string = "Meter " + id, latitude = -1, longitude = -1) {
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.name = name;
+        this.id = id;
     }
+
 }
 
 class ConfidenceLevel {
     level: number;
 
-    constructor(level: number) {
+    constructor(level: number = MAX_CONF_LVL) {
         if(!this.isValidLevel(level)) {
             throw new RangeError("Level should be between 0 and 1 (included)");
         }
@@ -130,7 +105,7 @@ class ConfidenceLevel {
     }
 
     public oppositeLevel(): number {
-        return 1 - this.level;
+        return MAX_CONF_LVL - this.level;
     }
 }
 
@@ -166,48 +141,49 @@ function oppositeState(current: State): State {
     return State.CLOSED;
 }
 
-class UStatus  {
-    confidence: ConfidenceLevel;
-    state: State;
 
-    constructor(state: State, confidence?: number) {
-        const level = (confidence === undefined)? MAX_CONF_LVL : confidence;
-        this.confidence = new ConfidenceLevel(level);
-        this.state = state;
-    }
-
-    public isClosed(): boolean {
-        return this.state === State.CLOSED;
-    }
-
-    get prettyConf(): string {
-        return this.confidence.prettyConf();
-    }
-
-
-    public opposite(): UStatus {
-        return new UStatus(oppositeState(this.state), this.confidence.oppositeLevel());
-    }
-
-}
+// class UStatus  {
+//     confidence: ConfidenceLevel;
+//     state: State;
+//
+//     constructor(state: State, confidence?: number) {
+//         const level = (confidence === undefined)? MAX_CONF_LVL : confidence;
+//         this.confidence = new ConfidenceLevel(level);
+//         this.state = state;
+//     }
+//
+//     public isClosed(): boolean {
+//         return this.state === State.CLOSED;
+//     }
+//
+//     get prettyConf(): string {
+//         return this.confidence.prettyConf();
+//     }
+//
+//
+//     public opposite(): UStatus {
+//         return new UStatus(oppositeState(this.state), this.confidence.oppositeLevel());
+//     }
+//
+// }
 
 class Fuse implements Identifiable, Localisable, Named{
     readonly id: number;
     latitude: number;
     longitude: number;
     name: string;
-    status: UStatus;
-    uloads: Array<ULoad>;
+    // status: UStatus;
+    // uloads: Array<ULoad>;
     private _cable!: Cable;
 
 
-    constructor(id: number, state: State, confidence?: number, name?: string) {
+    constructor(id: number, name?: string) {
         this.id = id;
         this.latitude = -1;
         this.longitude = -1;
         this.name = (name === undefined)? "Fuse " + id : name;
-        this.status = new UStatus(state, confidence);
-        this.uloads = new Array<ULoad>();
+        // this.status = new UStatus(state, confidence);
+        // this.uloads = new Array<ULoad>();
     }
 
     public get cable(): Cable {
@@ -221,9 +197,9 @@ class Fuse implements Identifiable, Localisable, Named{
         this._cable = cable;
     }
 
-    public isClosed(): boolean {
-        return this.status.isClosed();
-    }
+    // public isClosed(): boolean {
+    //     return this.status.isClosed();
+    // }
 
 }
 
@@ -237,6 +213,7 @@ export {
     EntityType,
     State,
     ULoad,
-    UStatus
+    ConfidenceLevel,
+    oppositeState
 }
 

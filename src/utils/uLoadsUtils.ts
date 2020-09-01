@@ -1,7 +1,7 @@
 import {ULoad} from "@/ts/grid";
 
-export function prettyStr(uLoads: Array<ULoad>): string {
-    if(uLoads.length == 0) {
+export function prettyStr(uLoads: Array<ULoad> | undefined): string {
+    if(uLoads === undefined || uLoads.length == 0) {
         return "TBD";
     }
 
@@ -24,8 +24,8 @@ export interface ULoadInfo {
     y?: number;
 }
 
-export function uLoadsData(uloads: Array<ULoad>): Array<ULoadInfo> {
-    if (uloads.length === 0) {
+export function uLoadsData(uloads: Array<ULoad>|undefined): Array<ULoadInfo> {
+    if (uloads === undefined || uloads.length === 0) {
         const res: ULoadInfo = {
             id: 0,
             value: "TBD",

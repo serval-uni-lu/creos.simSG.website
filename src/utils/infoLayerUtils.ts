@@ -13,7 +13,7 @@ export function layerHeight(nbLineInTemplate: number, nbUloads: number) {
     return getYText(nbLineInTemplate, nbLineInTemplate + realNb);
 }
 
-export function uLoadsDataWithY(uloads: Array<ULoad>, nbLineInTemplate: number): Array<ULoadInfo> {
+export function uLoadsDataWithY(uloads: Array<ULoad> | undefined, nbLineInTemplate: number): Array<ULoadInfo> {
     const res = uLoadsData(uloads);
     res.forEach((value, index) => {
         value.y = getYText(nbLineInTemplate, nbLineInTemplate + index);

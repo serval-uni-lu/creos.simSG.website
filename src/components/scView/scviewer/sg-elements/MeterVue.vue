@@ -15,6 +15,7 @@
     import {Selection, ElmtType} from "@/utils/selection";
     import {namespace} from "vuex-class";
     import {Grid} from "@/ts/grid";
+    import {getConsumption} from "@/store/modules/grid-state";
 
     const inspState = namespace('InspectorState');
     const gridState = namespace('GridState');
@@ -27,8 +28,14 @@
         @inspState.State
         public selectedElement!: Selection;
 
+        // @gridState.State
+        // public grid!: Grid;
+
+        // @gridState.Getter
+        // public getConsumption!: (meterId: number) => number;
+
         @gridState.State
-        public grid!: Grid;
+        public meterCons!: Map<number, number>;
 
         @inspState.Mutation
         public select!: (elmt: Selection) => void;
@@ -60,7 +67,8 @@
         }
 
         get consumption(): number {
-            return this.grid.getMeter(this.id).consumption;
+            return getConsumption(this.meterCons, this.id);
+            // return this.grid.getMeter(this.id).consumption;
         }
 
         public eventHandler(): void {

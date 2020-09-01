@@ -7,7 +7,7 @@
                     label(class="switch")
                         input(type="checkbox" id="fuseStatus" v-model.boolean="isClosed")
                         span(class="slider")
-                span(class="stateInfo") ({{status}})
+                span(class="stateInfo") ({{status()}})
                 .confidence
                     span Confidence level:
                     br
@@ -27,28 +27,56 @@
     import {namespace} from "vuex-class";
     import {Selection} from "@/utils/selection";
     import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
-    import {Fuse, Grid} from "@/ts/grid";
+    import {ConfidenceLevel, Fuse, Grid, State, ULoad} from "@/ts/grid";
+    import {fuseIsClosed, getFuseState, getFuseStatusConf, UpdateNumVal} from "@/store/modules/grid-state";
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace('GridState');
 
     @Component
     export default class FuseInsp extends Vue{
+        // @gridState.State
+        // public grid!: Grid;
+
+        // @gridState.Getter
+        // public getFuseULoads!: (id: number) => Array<ULoad>| undefined;
+        //
+        // @gridState.Getter
+        // public fuseIsClosed!: (id: number) => boolean;
+        //
+        // @gridState.Getter
+        // public getFuseStatusConf!: (id: number) => number;
+        //
+        // @gridState.Getter
+        // public getFuseState!: (id: number) => State;
+
         @gridState.State
-        public grid!: Grid;
+        public fuseULoads!: Map<number, Array<ULoad>>;
+
+        @gridState.State
+        public fuseUStatusState!: Map<number, State>;
+
+        @gridState.State
+        public fuseUStatusConf!: Map<number, ConfidenceLevel>;
 
         @gridState.Mutation
         public switchFuse!: (id: number) => void;
 
+        @gridState.Mutation
+        public updateStateConf!: (data: UpdateNumVal) => void;
+
         @inspectorState.State
         public selectedElement!: Selection;
 
-        get fuse(): Fuse {
-            return this.grid.getFuse(this.selectedElement.id);
-        }
+
+        // get fuse(): Fuse {
+        //     return this.grid.getFuse(this.selectedElement.id);
+        // }
 
         get isClosed() {
-            return this.fuse.isClosed();
+            // return this.fuse.isClosed();
+            // return fuseIsClosed(this.fuseUStatusState, this.selectedElement.id);
+            return  this.fuseUStatusState.get(this.selectedElement.id) === State.CLOSED
         }
 
         // eslint-disable-next-line
@@ -57,18 +85,22 @@
         }
 
         get confLevel() {
-            let roundedPerc = this.fuse.status.confidence.level * 100;
+            // let roundedPerc = this.fuse.status.confidence.level * 100;
+            let roundedPerc = getFuseStatusConf(this.fuseUStatusConf, this.selectedElement.id) * 100;
             roundedPerc = Math.round((roundedPerc + Number.EPSILON) * 100) / 100;
             return roundedPerc;
         }
 
         set confLevel(newPerc: number) {
-            this.fuse.status.confidence.level = newPerc / 100;
+            this.updateStateConf({id: this.selectedElement.id, newValue: newPerc / 100});
+            // this.fuse.status.confidence.level = newPerc / 100;
         }
 
 
-        get status(): string {
-            return this.fuse.status.state;
+        public status(): string {
+            // return this.fuse.status.state;
+            // return getFuseState(this.fuseUStatusState, this.selectedElement.id);
+            return this.fuseUStatusState.get(this.selectedElement.id) as State;
         }
 
         public show(event: MouseEvent) {
@@ -84,7 +116,7 @@
         }
 
         public uLoads(): Array<ULoadInfo> {
-            return uLoadsData(this.fuse.uloads);
+            return uLoadsData(this.fuseULoads.get(this.selectedElement.id));
         }
 
     }

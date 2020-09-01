@@ -11,7 +11,7 @@
     import {namespace} from "vuex-class";
     import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
     import {Selection} from "@/utils/selection";
-    import {Grid} from "@/ts/grid";
+    import {Grid, ULoad} from "@/ts/grid";
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace('GridState');
@@ -25,8 +25,16 @@
         @gridState.State
         public grid!: Grid;
 
+        @gridState.State
+        public cableULoads!: Map<number, Array<ULoad>>;
+
+        // @gridState.Getter
+        // public getCableULoad!: (id: number) => Array<ULoad>| undefined;
+
+
+
         public uLoads(): Array<ULoadInfo> {
-            return uLoadsData(this.grid.getCable(this.selectedElement.id as number).uLoads);
+            return uLoadsData(this.cableULoads.get(this.selectedElement.id));
         }
 
 
