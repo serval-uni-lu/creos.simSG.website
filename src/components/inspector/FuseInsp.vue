@@ -28,7 +28,7 @@
     import {Selection} from "@/utils/selection";
     import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
     import {ConfidenceLevel, Fuse, Grid, State, ULoad} from "@/ts/grid";
-    import {fuseIsClosed, getFuseState, getFuseStatusConf, UpdateNumVal} from "@/store/modules/grid-state";
+    import GridState, {fuseIsClosed, getFuseState, getFuseStatusConf, UpdateNumVal} from "@/store/modules/grid-state";
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace('GridState');
@@ -68,6 +68,18 @@
         @inspectorState.State
         public selectedElement!: Selection;
 
+        @gridState.Getter
+        public test!: number;
+
+        @gridState.Getter
+        public test2!: (id: number) => void;
+
+        @gridState.Getter
+        public test3!: (id: number) => number;
+
+        @gridState.Getter
+        public toto!: number;
+
 
         // get fuse(): Fuse {
         //     return this.grid.getFuse(this.selectedElement.id);
@@ -86,9 +98,20 @@
 
         get confLevel() {
             // let roundedPerc = this.fuse.status.confidence.level * 100;
-            let roundedPerc = getFuseStatusConf(this.fuseUStatusConf, this.selectedElement.id) * 100;
-            roundedPerc = Math.round((roundedPerc + Number.EPSILON) * 100) / 100;
-            return roundedPerc;
+            // let roundedPerc = getFuseStatusConf(this.fuseUStatusConf, this.selectedElement.id) * 100;
+            // roundedPerc = Math.round((roundedPerc + Number.EPSILON) * 100) / 100;
+            // return roundedPerc;
+            // console.log(this.test);
+            // console.log(this.test2);
+            // console.log(this.test2(87));
+            // console.log(this.test3(2));
+            // return 2;
+
+
+            console.log(this.toto);
+
+
+            return 2;
         }
 
         set confLevel(newPerc: number) {

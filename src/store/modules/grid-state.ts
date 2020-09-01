@@ -47,7 +47,9 @@ export function getConsumption(meterCons: Map<number, number>, meterId: number):
 
 
 
-@Module({namespaced: true})
+@Module({
+    namespaced: true,
+})
 export default class GridState extends VuexModule {
     public grid: Grid = NULL_GRID;
 
@@ -58,6 +60,16 @@ export default class GridState extends VuexModule {
 
     public fuseULoads = new Map<number, Array<ULoad>>();
     public cableULoads = new Map<number, Array<ULoad>>();
+
+    get test4(): (id: number) => void {
+        return (id) => {
+            console.log(id);
+        }
+    }
+
+    get toto() {
+        return 5 + this.meterCons.size;
+    }
 
     @Mutation
     public initFromScenario(scenario: Scenario) {
@@ -137,3 +149,16 @@ export default class GridState extends VuexModule {
 
 
 }
+
+GridState.getters = {
+    test: (state: GridState): number => {
+        console.log(state);
+        return 5;
+    },
+    test2: (state: GridState) => (id: number): void => {
+        console.log(id);
+    },
+    test3: (state: GridState) => (id: number): number => {
+        return 98 + id;
+    },
+};
