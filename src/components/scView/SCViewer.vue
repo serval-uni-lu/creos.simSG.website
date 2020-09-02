@@ -16,12 +16,10 @@
     import SingleCable from "@/components/scView/scviewer/scenarios/SingleCable.vue";
     import Cabinet from "@/components/scView/scviewer/scenarios/Cabinet.vue";
     import {Point} from "@/utils/svg-types";
-    import {namespace} from "vuex-class";
     import ParaSubs from "@/components/scView/scviewer/scenarios/ParaSubs.vue";
     import ParaCabinet from "@/components/scView/scviewer/scenarios/ParaCabinet.vue";
     import IndirectPara from "@/components/scView/scviewer/scenarios/IndirectPara.vue";
 
-    const inspectorState = namespace('InspectorState');
 
     @Component({
         components: {IndirectPara, ParaCabinet, ParaSubs, Cabinet, SingleCable, ToolBar}
@@ -29,8 +27,7 @@
     export default class SCViewer extends Vue {
         @Prop() name!: string;
 
-        @inspectorState.Mutation
-        public reset!: () => void;
+
 
         public elmtDragged!: SVGElement | null;
         public offsetDrag!: Point;
@@ -115,11 +112,6 @@
 
         public stopDrag(): void {
             this.elmtDragged = null;
-        }
-
-        @Watch('$route')
-        public onRouteChanged() {
-            this.reset();
         }
     }
 </script>

@@ -1,12 +1,12 @@
-import {ElmtType} from "@/utils/selection";
-import {ElmtType} from "@/utils/selection";
 <template lang="pug">
-    div
-        h2 {{selectedElement.type}} - {{selectedElement.id + 1}}
+    .testitounet
+        h2 {{selectedElement.name}}
+        h3(v-if="nameNotDefault") {{selectedElement.type}} - {{selectedElement.id}}
         .form
-            FuseInsp(v-if="isFuse")
+            FuseInsp(v-if="isFuse" :fuseId="selectedElement.id")
             MeterInsp(v-else-if="isMeter")
             CableInsp(v-else-if="isCable")
+            EntityInsp(v-else-if="isEntity")
         .closingButton(v-on:click="reset()")
             svg
                 use(xlink:href="#close-button")
@@ -21,11 +21,12 @@ import {ElmtType} from "@/utils/selection";
     import FuseInsp from "@/components/inspector/FuseInsp.vue";
     import MeterInsp from "@/components/inspector/MeterInsp.vue";
     import CableInsp from "@/components/inspector/CableInsp.vue";
+    import EntityInsp from "@/components/inspector/EntityInsp.vue";
 
     const inspectorState = namespace('InspectorState');
 
     @Component({
-        components: {CableInsp, MeterInsp, FuseInsp}
+        components: {EntityInsp, CableInsp, MeterInsp, FuseInsp}
     })
     export default class Inspector extends Vue{
 
@@ -45,6 +46,14 @@ import {ElmtType} from "@/utils/selection";
 
         get isCable(): boolean {
             return this.selectedElement.type === ElmtType.Cable;
+        }
+
+        get isEntity(): boolean {
+            return this.selectedElement.type === ElmtType.Entity;
+        }
+
+        get nameNotDefault(): boolean {
+            return this.selectedElement.name !== this.selectedElement.type + " - " + this.selectedElement.id
         }
 
     }
@@ -75,5 +84,9 @@ import {ElmtType} from "@/utils/selection";
             }
 
         }
+    }
+
+    .testitounet {
+        max-height: 500px;
     }
 </style>

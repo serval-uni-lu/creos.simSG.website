@@ -23,7 +23,7 @@
 
 <script lang="ts">
 
-    import {Component, Vue} from "vue-property-decorator";
+    import {Component, Vue, Prop} from "vue-property-decorator";
     import {namespace} from "vuex-class";
     import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
     import {State, ULoad} from "@/ts/grid";
@@ -35,14 +35,17 @@
 
     @Component
     export default class FuseInsp extends Vue{
+        @Prop()
+        fuseId!: number;
+
         @gridState.Mutation
         public switchFuse!: (id: number) => void;
 
         @gridState.Mutation
         public updateStateConf!: (data: UpdateNumVal) => void;
 
-        @inspectorState.State
-        public selectedElement!: Selection;
+        // @inspectorState.State
+        // public selectedElement!: Selection;
 
         @gridState.Getter
         public fuseState!: (id: number) => State;
@@ -57,27 +60,32 @@
         public fuseConfLevel!: (id: number) => number;
 
         get isClosed() {
-            return this.fuseIsClosed(this.selectedElement.id);
+            // return this.fuseIsClosed(this.selectedElement.id);
+            return this.fuseIsClosed(this.fuseId);
         }
 
         // eslint-disable-next-line
         set isClosed(newVal: boolean) {
-            this.switchFuse(this.selectedElement.id);
+            // this.switchFuse(this.selectedElement.id);
+            this.switchFuse(this.fuseId);
         }
 
         get confLevel() {
-            let roundedPerc = this.fuseConfLevel(this.selectedElement.id) * 100;
+            // let roundedPerc = this.fuseConfLevel(this.selectedElement.id) * 100;
+            let roundedPerc = this.fuseConfLevel(this.fuseId) * 100;
             roundedPerc = Math.round((roundedPerc + Number.EPSILON) * 100) / 100;
             return roundedPerc;
         }
 
         set confLevel(newPerc: number) {
-            this.updateStateConf({id: this.selectedElement.id, newValue: newPerc / 100});
+            // this.updateStateConf({id: this.selectedElement.id, newValue: newPerc / 100});
+            this.updateStateConf({id: this.fuseId, newValue: newPerc / 100});
         }
 
 
         get status(): string {
-           return this.fuseState(this.selectedElement.id)
+           // return this.fuseState(this.selectedElement.id)
+           return this.fuseState(this.fuseId)
         }
 
         public show(event: MouseEvent) {
@@ -93,7 +101,8 @@
         }
 
         public uLoads(): Array<ULoadInfo> {
-            return uLoadsData(this.fuseULoads(this.selectedElement.id));
+            // return uLoadsData(this.fuseULoads(this.selectedElement.id));
+            return uLoadsData(this.fuseULoads(this.fuseId));
         }
 
     }

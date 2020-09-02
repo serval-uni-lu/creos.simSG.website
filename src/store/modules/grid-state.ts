@@ -1,7 +1,9 @@
 import {Module, Mutation, VuexModule} from "vuex-module-decorators";
 import {getScNbFuses, Scenario} from "@/ts/scenario";
-import {Cable, ConfidenceLevel, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
+import {Cable, ConfidenceLevel, Entity, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
 import {Vue} from "vue-property-decorator";
+import {GridJson} from "@/types/sg-json.types";
+import {GridData, json2Grid} from "@/utils/grid-utils";
 
 export interface UpdateNumVal {
     id: number;
@@ -156,6 +158,24 @@ export default class GridState extends VuexModule {
 
         this.grid = new Grid(cables, fuses, meters);
         this.indexesUsed = false;
+    }
+
+    @Mutation
+    public initFromJson(json: GridJson) {
+        const data: GridData = json2Grid(json);
+
+        this.grid = data.staticInfo;
+
+        this.meterIdx = data.meterIdx;
+        this.fuseIdx = data.fuseIdx;
+        this.cableIdx = data.cableIdx;
+        this.indexesUsed = true;
+
+        this.metersCons = data.metersCons;
+        this.fusesUStatusState = data.fusesStates;
+        this.fusesUStatusConf = data.fusesConf;
+        this.fusesULoads = data.fusesULoads;
+        this.cablesULoads = data.cablesULoads;
     }
 
     @Mutation

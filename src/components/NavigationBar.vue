@@ -24,6 +24,7 @@
 
 <style lang="scss">
     #main-nav {
+        z-index: 1000;
         background-color: lightgray;
         display: flex;
         justify-content: center;

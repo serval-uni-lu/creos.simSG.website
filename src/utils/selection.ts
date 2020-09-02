@@ -2,17 +2,20 @@ export enum ElmtType {
     NULL,
     Fuse= "Fuse",
     Meter= "Meter",
-    Cable= "Cable"
+    Cable= "Cable",
+    Entity= "Entity"
 }
 
 export class Selection {
     id: number;
     type: ElmtType;
+    name: string;
 
 
-    constructor(id: number, type: ElmtType) {
+    constructor(id: number, type: ElmtType, name= type + " - " + id) {
         this.id = id;
         this.type = type;
+        this.name = name;
     }
 
     public equals(other: Selection): boolean {

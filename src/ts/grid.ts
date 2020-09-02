@@ -5,8 +5,8 @@ interface Identifiable {
 }
 
 interface Localisable {
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
 }
 
 interface Named {
@@ -53,21 +53,21 @@ enum EntityType {
 }
 
 class Entity implements Identifiable, Localisable, Named {
-    fuses: Map<number, Fuse>;
+    fuses: Array<Fuse>;
     type: EntityType;
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
     name: string;
     readonly id: number;
 
 
-    constructor(id: number, type: EntityType, name: string, latitude?: number, longitude?: number) {
+    constructor(id: number, type: EntityType, name: string, fuses: Array<Fuse>, latitude?: number, longitude?: number,) {
         this.type = type;
         this.id = id;
         this.name = name;
-        this.fuses = new Map<number, Fuse>();
-        this.latitude = (latitude === undefined)? -1 : latitude;
-        this.longitude = (longitude === undefined)? -1 : longitude;
+        this.fuses = fuses;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }
 

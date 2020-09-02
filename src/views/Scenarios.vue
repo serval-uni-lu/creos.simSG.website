@@ -14,7 +14,7 @@
         components: {ScenarioList}
     })
     export default class Scenarios extends Vue{
-        private scenarios = json;
+        public scenarios = json;
     }
 </script>
 

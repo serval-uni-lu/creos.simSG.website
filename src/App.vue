@@ -6,14 +6,24 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator';
+    import {Component, Vue, Watch} from 'vue-property-decorator';
     import Header from "@/components/Header.vue";
     import NavigationBar from "@/components/NavigationBar.vue";
+    import {namespace} from "vuex-class";
+
+    const inspectorState = namespace('InspectorState');
 
     @Component({
         components: {NavigationBar, Header}
     })
     export default class App extends Vue {
+        @inspectorState.Mutation
+        public reset!: () => void;
+
+        @Watch('$route')
+        public onRouteChanged() {
+            this.reset();
+        }
     }
 </script>
 

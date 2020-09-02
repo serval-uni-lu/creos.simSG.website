@@ -1,30 +1,26 @@
-import {ElmtType} from "@/utils/selection";
 <template lang="pug">
     section
         h2 Real-case scenario: Reckange disctrict (Mersch, Luxembourg)
 
-        .container
+        div#viewer
             Action#action
             #lg-map
             Inspector#inspector(v-if="inspVisible")
-
-
 </template>
 
 <script lang="ts">
     import {Component, Vue} from "vue-property-decorator";
-    import L, {LatLngExpression, LatLngLiteral, LeafletMouseEvent, PolylineOptions, TileLayer} from 'leaflet';
     import Action from "@/components/Action.vue";
-    import json from "@/assets/grids/real-case.json";
-    import {namespace} from "vuex-class";
-    import {CableJson, EntityJson, GridJson, LocationJson} from "@/types/sg-json.types";
     import Inspector from "@/components/inspector/Inspector.vue";
+    import {namespace} from "vuex-class";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-    import {Entity, Grid} from "@/ts/grid";
+    import L from "leaflet";
+    import {Entity, EntityType, Grid} from "@/ts/grid";
+    import {GridJson} from "@/types/sg-json.types";
+    import json from "@/assets/grids/real-case.json";
 
-    const gridState = namespace('GridState');
     const inspectorState = namespace('InspectorState');
-
+    const gridState = namespace("GridState");
 
     const logoSize = 25;
     const iconSubs = L.icon({
@@ -37,198 +33,81 @@ import {ElmtType} from "@/utils/selection";
         iconSize: [logoSize, logoSize]
     });
 
-    const epsilon = 0.00005;
+    class EntityMarker extends L.Marker {
+        id: number;
+        name: string;
 
-    function mapPathKey(e1: Entity, e2: Entity) {
-        return e1.name + e2.name;
-    }
-
-    type Path =  {
-        point1: Location;
-        point2: Location;
-    }
-
-
-
-    function getLines(grid: GridJson): Array<Path> {
-
-        // // Build a map: fuseId -> Entity
-        // const mapOwner = new Map<number, Entity>();
-        // grid.entities.forEach((ent: Entity) => {
-        //    ent.fuses.forEach((fuseId: number) => {
-        //        mapOwner.set(fuseId, ent);
-        //    })
-        // });
-        //
-        // // Build a map: [Entity, Entity] -> [Path, number]
-        // const paths = new Map<string, [Path, number]>();
-        // grid.cables.forEach((cable: Cable) => {
-        //     const owner1 = mapOwner.get(cable.fuses[0]) as Entity;
-        //     const owner2 = mapOwner.get(cable.fuses[1]) as Entity;
-        //
-        //     if(owner1.location !== undefined && owner2.location !== undefined) {
-        //         const key = mapPathKey(owner1, owner2);
-        //         if(paths.has(key)) {
-        //             (paths.get(key) as [Path, number])[1]++;
-        //         } else {
-        //             paths.set(key, [{point1: owner1.location, point2: owner2.location}, 1]);
-        //         }
-        //     }
-        // });
-        //
-        // //from the map, create the final array
-        // const res = Array<Path>();
-        // paths.forEach((path: [Path, number]) => {
-        //     if(path[1] === 1) {
-        //         res.push(path[0])
-        //     } else {
-        //         const middle = Math.floor(path[1] / 2);
-        //         for(let id=0; id<middle; id++) {
-        //             const newP: Path = {
-        //                 point1: {...path[0].point1},
-        //                 point2: {...path[0].point2}
-        //             };
-        //             const offset = (id + 1) * epsilon;
-        //             newP.point1.lat += offset;
-        //             newP.point2.lat += offset;
-        //             res.push(newP);
-        //         }
-        //
-        //         for(let id=middle; id<path[1]; id++) {
-        //             const newP: Path = {
-        //                 point1: {...path[0].point1},
-        //                 point2: {...path[0].point2}
-        //             };
-        //             const offset = (id - middle + 1) * epsilon;
-        //             newP.point1.lat -= offset;
-        //             newP.point2.lat -= offset;
-        //             res.push(newP);
-        //         }
-        //     }
-        // });
-        //
-        // return res;
-        return [];
-    }
-
-    class DataMarker extends L.Marker {
-        data: any;
-
-        constructor(latLng: L.LatLngExpression, data: any, options?: L.MarkerOptions) {
+        constructor(latLng: L.LatLngExpression, id: number, name: string, options?: L.MarkerOptions) {
             super(latLng, options);
-            this.setData(data);
+            this.id = id;
+            this.name = name;
         }
 
-        getData() {
-            return this.data;
-        }
-
-        setData(data: any) {
-            this.data = data;
-        }
-    }
-
-    class DataPolyLine extends L.Polyline {
-        data: any;
-
-        constructor(latlngs: LatLngExpression[] | LatLngExpression[][], data: any, options?: PolylineOptions) {
-            super(latlngs, options);
-            this.data = data;
-        }
     }
 
 
     @Component({
         components: {Inspector, Action}
     })
-    export default class LuxSG extends Vue {
-        @gridState.State
-        public grid!: Grid;
-
-        @gridState.Mutation
-        public init!: (json: GridJson) => void;
-
+    export default class LuxSG extends Vue{
         @inspectorState.State
         public selectedElement!: Selection;
 
         @inspectorState.Mutation
         public select!: (elmt: Selection) => void;
 
-        public map!: L.Map;
-        public tileLayers!: TileLayer;
-        public layers!: Array<object>;
+        @gridState.State
+        public grid!: Grid;
+
+        @gridState.Mutation
+        public initFromJson!: (json: GridJson) => void;
 
         get inspVisible(): boolean {
             return !this.selectedElement.equals(NullSelection);
         }
 
-
         public created() {
-            this.init(json as GridJson);
-        }
-
-        public handleEvenOnMap(e: LeafletMouseEvent) {
-            this.select(new Selection(0, ElmtType.Fuse));
-            console.log(e.target.data)
+            this.initFromJson(json as GridJson);
         }
 
         public mounted() {
-            this.map = L.map("lg-map", {
+            const map = L.map("lg-map", {
                 center: [49.749219791749525, 6.08051569442007],
                 zoom: 16,
                 zoomControl: false
             });
 
-            this.tileLayers = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             });
-            this.tileLayers.addTo(this.map);
+            tileLayer.addTo(map);
 
+            this.grid.entities?.forEach((entity: Entity) => {
+                if(entity.latitude !== undefined && entity.longitude !== undefined) {
+                    const icon = (entity.type === EntityType.SUBSTATION)? iconSubs : iconCabinet;
+                    // L.marker([entity.latitude, entity.longitude], {icon})
+                    //     .addTo(map);
+                    const marker = new EntityMarker([entity.latitude, entity.longitude], entity.id, entity.name, {icon});
+                    marker.addTo(map);
+                    marker.on("click", (event: L.LeafletMouseEvent) => {
+                        this.select(new Selection(event.target.id, ElmtType.Entity, event.target.name));
+                    })
+                }
+            });
 
-            // this.grid.entities.forEach((ent: Entity) => {
-            //     if(ent.location !== undefined) {
-            //         const icon = (ent.type.toLowerCase() === EntityType.CABINET.toLowerCase())? iconCabinet : iconSubs;
-            //         // L.marker([ent.location.lat, ent.location.long], {icon: icon}).addTo(this.map);
-            //
-            //         const marker = new DataMarker([ent.location.lat, ent.location.long], "YouPi!", {
-            //             icon: icon
-            //         });
-            //         marker.addTo(this.map);
-            //         marker.on("click", event => {
-            //             console.log(event.target);
-            //         });
-            //     }
-            // });
-
-            // this.map.on("click", this.handleEvenOnMap);
-
-            // for(const line of getLines(this.grid)) {
-            //     const geoLine: LatLngLiteral[] = [
-            //         {lat: line.point1.lat, lng: line.point1.long},
-            //         {lat: line.point2.lat, lng: line.point2.long}
-            //     ];
-            //
-            //     // L.polyline(geoLine, {
-            //     //     color: 'black'
-            //     // }).addTo(this.map);
-            //     const l = new DataPolyLine(geoLine, "Oh oui!", {
-            //         color: 'black'
-            //     });
-            //     l.addTo(this.map);
-            //     l.on('click', event => {
-            //         console.log(event.target)
-            //     })
-            // }
 
         }
+
+
 
     }
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
     $size-side-elmt: 19%;
     $margin: 1%;
-    $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 2);
+    $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 2 - (#{$margin} * 2));
+    $margin-bottom: 10px;
     $color: lightgrey;
 
     section {
@@ -237,7 +116,7 @@ import {ElmtType} from "@/utils/selection";
         flex-direction: column;
     }
 
-    .container {
+    #viewer {
         flex: 1;
         display: flex;
         flex-direction: row;
@@ -247,22 +126,23 @@ import {ElmtType} from "@/utils/selection";
     #action {
         width: $size-side-elmt;
         margin-left: $margin;
-        margin-bottom: $margin;
+        margin-bottom: $margin-bottom;
         background-color: $color;
     }
 
     #lg-map {
         width: $remaining;
-        margin: 0 $margin $margin;
+        margin-bottom: $margin-bottom;
+        margin-left: $margin;
+        margin-right: $margin;
     }
 
     #inspector {
         width: $size-side-elmt;
         box-shadow: 10px 10px 16px darkgray;
         background-color: $color;
-        margin-bottom: $margin;
+        margin-bottom: $margin-bottom;
         margin-right: $margin;
         position: relative;
     }
-
 </style>
