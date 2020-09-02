@@ -5,6 +5,10 @@ import {NullSelection, Selection} from "@/utils/selection";
 class InspectorState extends VuexModule {
     public selectedElement: Selection = NullSelection;
 
+    get testitounet() {
+        return 5;
+    }
+
     @Mutation
     public select(elmt: Selection) {
         this.selectedElement = elmt;

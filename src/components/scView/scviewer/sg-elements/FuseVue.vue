@@ -12,10 +12,9 @@
     import {Component, Prop, Vue} from "vue-property-decorator";
     import {namespace} from "vuex-class";
     import {ElmtType, Selection} from "@/utils/selection";
-    import {prettyStr} from "@/utils/uLoadsUtils";
     import {Point} from "@/utils/svg-types";
-    import {ConfidenceLevel, Fuse, Grid, State, ULoad} from "@/ts/grid";
-    import {fuseIsClosed, getFuseState} from "@/store/modules/grid-state";
+    import {State, ULoad} from "@/ts/grid";
+    import {prettyStr} from "@/utils/uLoadsUtils";
 
     const gridState = namespace('GridState');
     const inspState = namespace('InspectorState');
@@ -36,35 +35,19 @@
         @Prop({default: 0}) shiftTextX!: number;
         @Prop({default:0}) shiftTextY!: number;
 
-        // @gridState.Getter
-        // public getFuseULoads!: (id: number) => Array<ULoad>| undefined;
-        //
-        // @gridState.Getter
-        // public fuseIsClosed!: (id: number) => boolean;
-        //
-        // @gridState.Getter
-        // public getFuseStatusConf!: (id: number) => number;
-        //
-        // @gridState.Getter
-        // public getFuseState!: (id: number) => State;
+        @gridState.Getter
+        public fuseIsClosed!: (id: number) => boolean;
 
-        @gridState.State
-        public fuseULoads!: Map<number, Array<ULoad>>;
-
-        @gridState.State
-        public fuseUStatusState!: Map<number, State>;
-
-        @gridState.State
-        public fuseUStatusConf!: Map<number, ConfidenceLevel>;
-
+        @gridState.Getter
+        public fuseState!: (id: number) => State;
 
         public selection: Selection = new Selection(this.id, ElmtType.Fuse)
 
-        // @gridState.State
-        // public grid!: Grid;
-
         @gridState.Mutation
         public switchFuse!: (id: number) => void;
+
+        @gridState.Getter
+        public fuseULoads!: (id: number) => Array<ULoad>;
 
         @inspState.Mutation
         public select!: (elmt: Selection) => void;
@@ -93,24 +76,15 @@
         }
 
         get isClosed(): boolean {
-            return this.fuseUStatusState.get(this.id) === State.CLOSED
-            // return fuseIsClosed(this.fuseUStatusState, this.id);
-            // return this.fuseIsClosed(this.id);
-            // return this.fuse.isClosed();
+           return this.fuseIsClosed(this.id);
         }
 
-        // get fuse(): Fuse {
-        //     return this.grid.getFuse(this.id);
-        // }
-
         get status(): string {
-            // return this.fuse.status.state;
-            return getFuseState(this.fuseUStatusState, this.id);
+           return this.fuseState(this.id);
         }
 
         public uLoads(): string {
-            // return prettyStr(this.fuse.uloads);
-            return prettyStr(this.fuseULoads.get(this.id));
+            return prettyStr(this.fuseULoads(this.id));
         }
 
         public eventHandler(event: MouseEvent): void {

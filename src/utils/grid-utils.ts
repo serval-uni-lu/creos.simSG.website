@@ -85,46 +85,46 @@ interface GridData {
 
 
 
-function scenario2Grid(scenario: Scenario): GridData {
-    const nbFuses = getScNbFuses(scenario);
-
-    const fuses = new Map<number, Fuse>();
-    const fuseStates = new Map<number, State>();
-    const fuseConf = new Map<number, ConfidenceLevel>();
-
-    const cables = new Map<number, Cable>();
-    const meters = new Map<number, Meter>();
-
-    const meterCons= new Map<number, number>();
-
-    for (let i=0; i<nbFuses; i++) {
-        fuses.set(i, new Fuse(i));
-        fuseStates.set(i, State.CLOSED);
-        fuseConf.set(i, new ConfidenceLevel());
-    }
-
-    for (let i = 0; i < (nbFuses / 2); i++) {
-        const fuse1 = fuses.get(i*2) as Fuse;
-        const fuse2 = fuses.get(i*2 + 1) as Fuse;
-        const cable= new Cable(i, fuse1, fuse2);
-        cables.set(i, cable);
-
-        const meter = new Meter(i);
-        meters.set(i, meter);
-        cable.meters.push(meter);
-
-        meterCons.set(i, 0.)
-    }
-
-    return {
-        staticInfo: new Grid(cables, fuses, meters),
-        fuseConf: fuseConf,
-        fuseStates: fuseStates,
-        meterCons: meterCons
-    }
-}
-
-
+// function scenario2Grid(scenario: Scenario): GridData {
+//     const nbFuses = getScNbFuses(scenario);
+//
+//     const fuses = new Map<number, Fuse>();
+//     const fuseStates = new Map<number, State>();
+//     const fuseConf = new Map<number, ConfidenceLevel>();
+//
+//     const cables = new Map<number, Cable>();
+//     const meters = new Map<number, Meter>();
+//
+//     const meterCons= new Map<number, number>();
+//
+//     for (let i=0; i<nbFuses; i++) {
+//         fuses.set(i, new Fuse(i));
+//         fuseStates.set(i, State.CLOSED);
+//         fuseConf.set(i, new ConfidenceLevel());
+//     }
+//
+//     for (let i = 0; i < (nbFuses / 2); i++) {
+//         const fuse1 = fuses.get(i*2) as Fuse;
+//         const fuse2 = fuses.get(i*2 + 1) as Fuse;
+//         const cable= new Cable(i, fuse1, fuse2);
+//         cables.set(i, cable);
+//
+//         const meter = new Meter(i);
+//         meters.set(i, meter);
+//         cable.meters.push(meter);
+//
+//         meterCons.set(i, 0.)
+//     }
+//
+//     return {
+//         staticInfo: new Grid(cables, fuses, meters),
+//         fuseConf: fuseConf,
+//         fuseStates: fuseStates,
+//         meterCons: meterCons
+//     }
+// }
 
 
-export { scenario2Grid, GridData};
+
+
+export {GridData};

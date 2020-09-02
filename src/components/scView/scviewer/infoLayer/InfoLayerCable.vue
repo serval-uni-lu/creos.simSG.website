@@ -14,7 +14,7 @@
     import {namespace} from "vuex-class";
     import {getYText, layerHeight, uLoadsDataWithY} from "@/utils/infoLayerUtils";
     import {ULoadInfo} from "@/utils/uLoadsUtils";
-    import {Cable, Grid, ULoad} from "@/ts/grid";
+    import {ULoad} from "@/ts/grid";
 
     const toolbarState = namespace('ToolBarState');
     const gridState = namespace('GridState');
@@ -31,14 +31,9 @@
         @toolbarState.State
         public cableLayerVisible!: boolean;
 
-        // @gridState.Getter
-        // public getCableULoad!: (id: number) => Array<ULoad> | undefined;
+        @gridState.Getter
+        public cableULoads!: (id: number) => Array<ULoad>|undefined;
 
-        @gridState.State
-        public cableULoads!: Map<number, Array<ULoad>>;
-
-        // @gridState.State
-        // public grid!: Grid;
 
         get visibility(): string {
             return this.cableLayerVisible ? "visible" : "hidden";
@@ -50,14 +45,10 @@
             return "translate(" + realX + " " + realY + ")";
         }
 
-        // get cable(): Cable {
-        //     return this.grid.getCable(this.cableId);
-        // }
 
         get height(): number {
-            const uloads: Array<ULoad> | undefined = this.cableULoads.get(this.cableId);
+            const uloads: Array<ULoad>|undefined = this.cableULoads(this.cableId);
             const length = (uloads === undefined)? 1 : uloads.length;
-
             return layerHeight(InfoCableLayer.nbTextLineInTemplate, length);
         }
 
@@ -66,8 +57,7 @@
         }
 
         public uLoads(): Array<ULoadInfo> {
-            // return uLoadsDataWithY(this.cable.uLoads, InfoCableLayer.nbTextLineInTemplate);
-            return uLoadsDataWithY(this.cableULoads.get(this.cableId), InfoCableLayer.nbTextLineInTemplate);
+            return uLoadsDataWithY(this.cableULoads(this.cableId), InfoCableLayer.nbTextLineInTemplate);
         }
 
 

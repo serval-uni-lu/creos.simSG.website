@@ -31,8 +31,8 @@ import {CableType} from "@/utils/SvgTypes";
     import {CableInfo, CableType, ComplexCableInfo, OneLineCableInfo, SimpleCableInfo} from "@/utils/svg-types"
     import {namespace} from "vuex-class";
     import {ElmtType, Selection} from "@/utils/selection";
+    import {ULoad} from "@/ts/grid";
     import {prettyStr} from "@/utils/uLoadsUtils";
-    import {Grid, ULoad} from "@/ts/grid";
 
     const inspState = namespace('InspectorState');
     const gridState = namespace('GridState');
@@ -49,14 +49,8 @@ import {CableType} from "@/utils/SvgTypes";
         @inspState.State
         public  selectedElement!: Selection;
 
-        // @gridState.State
-        // public grid!: Grid;
-
-        // @gridState.Getter
-        // public getCableULoad!: (id: number) => Array<ULoad>| undefined;
-
-        @gridState.State
-        public cableULoads!: Map<number, Array<ULoad>>;
+        @gridState.Getter
+        public cableULoads!: (id: number) => Array<ULoad>;
 
         public selection: Selection = new Selection(this.id, ElmtType.Cable);
 
@@ -93,8 +87,7 @@ import {CableType} from "@/utils/SvgTypes";
         }
 
         public uLoads(): string {
-            return prettyStr(this.cableULoads.get(this.id));
-            // return prettyStr(this.grid.getCable(this.id).uLoads);
+            return prettyStr(this.cableULoads(this.id));
         }
     }
 </script>

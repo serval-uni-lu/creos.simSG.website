@@ -33,6 +33,7 @@
     "@vue/cli-service": "^4.4.0",
     "@vue/eslint-config-typescript": "^5.0.2",
     "@vue/test-utils": "^1.0.3",
+    "babel-plugin-transform-decorators": "^6.24.1",
     "chai": "^4.1.2",
     "chromedriver": "83",
     "eslint": "^6.7.2",
