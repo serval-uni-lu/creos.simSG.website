@@ -37,11 +37,7 @@
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace('GridState');
-
-    interface FuseData {
-        id: number;
-    }
-
+    
     @Component({
         components: {FuseInsp}
     })
