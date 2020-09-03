@@ -66,6 +66,9 @@
         font-size: $inspector-font-size;
         text-align: left;
         padding-left: 10px;
+        flex: 1 1 auto;
+        overflow-y: auto;
+        height: 0px;
     }
 
     .closingButton {

@@ -1,3 +1,4 @@
+import {ElmtType} from "@/utils/selection";
 <template lang="pug">
     section
         h2 Real-case scenario: Reckange disctrict (Mersch, Luxembourg)
@@ -68,6 +69,7 @@
 
         public created() {
             this.initFromJson(json as GridJson);
+            // this.select(new Selection(0, ElmtType.Entity))
         }
 
         public mounted() {
@@ -144,5 +146,7 @@
         margin-bottom: $margin-bottom;
         margin-right: $margin;
         position: relative;
+        display: flex;
+        flex-direction: column;
     }
 </style>
