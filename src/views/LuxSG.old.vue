@@ -140,7 +140,7 @@
     @Component({
         components: {Inspector, Action}
     })
-    export default class LuxSGOLD extends Vue {
+    export default class LuxSG extends Vue {
         @gridState.State
         public grid!: Grid;
 
