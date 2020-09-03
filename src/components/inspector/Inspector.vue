@@ -62,6 +62,14 @@
 <style scoped lang="scss">
     @import "@/scss/global-var.scss";
 
+    h2 {
+        margin-bottom: 0;
+    }
+
+    h3 {
+        margin-top: 0;
+    }
+
     .form {
         font-size: $inspector-font-size;
         text-align: left;

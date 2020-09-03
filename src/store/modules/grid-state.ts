@@ -1,6 +1,6 @@
 import {Module, Mutation, VuexModule} from "vuex-module-decorators";
 import {getScNbFuses, Scenario} from "@/ts/scenario";
-import {Cable, ConfidenceLevel, Entity, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
+import {Cable, ConfidenceLevel, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
 import {Vue} from "vue-property-decorator";
 import {GridJson} from "@/types/sg-json.types";
 import {GridData, json2Grid} from "@/utils/grid-utils";

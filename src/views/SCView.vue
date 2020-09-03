@@ -48,42 +48,11 @@
 </script>
 
 <style lang="scss" scoped>
-    $size-side-elmt: 19%;
-    $margin: 1%;
+    @import "@/scss/viewer.scss";
+
     $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 2);
-    $margin-bottom: 10px;
-    $color: lightgrey;
-
-    section {
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-    }
-
-    #viewer {
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-    }
-
-
-    #action {
-        width: $size-side-elmt;
-        margin-left: $margin;
-        margin-bottom: $margin-bottom;
-        background-color: $color;
-    }
 
     #scviewer {
         width: $remaining;
-    }
-
-    #inspector {
-        width: $size-side-elmt;
-        box-shadow: 10px 10px 16px darkgray;
-        background-color: $color;
-        margin-bottom: $margin-bottom;
-        margin-right: $margin;
-        position: relative;
     }
 </style>
