@@ -36,14 +36,14 @@ class Cable implements Identifiable, Named {
     readonly id: number;
     name: string;
 
-    constructor(id: number, fuse1: Fuse, fuse2: Fuse, name?: string) {
+    constructor(id: number, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
         this.fuse1 = fuse1;
         this.fuse1.cable = this;
         this.fuse2 = fuse2;
         this.fuse2.cable = this;
         this.meters = new Array<Meter>();
         this.id = id;
-        this.name = (name===undefined)? "Cable " + id : name;
+        this.name = name;
     }
 }
 
@@ -169,19 +169,17 @@ function oppositeState(current: State): State {
 
 class Fuse implements Identifiable, Localisable, Named{
     readonly id: number;
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
     name: string;
     // status: UStatus;
     // uloads: Array<ULoad>;
     private _cable!: Cable;
 
 
-    constructor(id: number, name?: string) {
+    constructor(id: number, name: string = "Fuse " + id) {
         this.id = id;
-        this.latitude = -1;
-        this.longitude = -1;
-        this.name = (name === undefined)? "Fuse " + id : name;
+        this.name = name;
         // this.status = new UStatus(state, confidence);
         // this.uloads = new Array<ULoad>();
     }

@@ -13,6 +13,7 @@ interface Cable {
 interface Meter {
     consumption: number;
     name:        string;
+    location?: Location;
 }
 
 interface Entity {

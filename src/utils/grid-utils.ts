@@ -1,4 +1,4 @@
-import {EntityJson, FuseJson, GridJson, LoadJson} from "@/types/sg-json.types";
+import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/types/sg-json.types";
 import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, State, ULoad} from "@/ts/grid";
 
 
@@ -30,50 +30,39 @@ function extractFuses(json: GridJson, mapFuses: Map<number, Fuse>, fuseIdx: Map<
     });
 }
 
-function extractCables(json: GridJson, mapFuses: Map<number, Fuse>, mapCables: Map<number, Cable>, mapMeter: Map<number, Meter>) {
-    // let idxMeter = 0;
-    //
-    //
-    // json.cables.forEach((cableJson: CableJson) => {
-    //     const fuse1 = mapFuses.get(cableJson.fuses[0]) as Fuse;
-    //     const fuse2 = mapFuses.get(cableJson.fuses[1]) as Fuse;
-    //
-    //     const cable = new Cable(cableJson.id, fuse1, fuse2);
-    //     mapCables.set(cableJson.id, cable);
-    //
-    //     cableJson.meters?.forEach((meterJson: MeterJson) => {
-    //        const meter = new Meter(meterJson.name, meterJson.consumption);
-    //        mapMeter.set(idxMeter, meter);
-    //        idxMeter++;
-    //        cable.meters.push(meter);
-    //     });
-    //
-    //
-    // });
+function extractCables(json: GridJson, mapFuses: Map<number, Fuse>, mapCables: Map<number, Cable>, meterIdx: Map<number, number>, mapMeter: Map<number, Meter>, meterCons: Array<number>) {
+    let idxMeter = 0;
+
+    json.cables.forEach((cableJson: CableJson) => {
+        const fuse1 = mapFuses.get(cableJson.fuses[0]) as Fuse;
+        const fuse2 = mapFuses.get(cableJson.fuses[1]) as Fuse;
+
+        cableJson.meters?.forEach((meterJson: MeterJson) => {
+            const meter = new Meter(idxMeter, meterJson.name, meterJson.location?.lat, meterJson.location?.long);
+            meterIdx.set(idxMeter, meterCons.length);
+            idxMeter++;
+            meterCons.push(meterJson.consumption);
+            mapMeter.set(idxMeter, meter);
+        });
+
+        const cable = new Cable(cableJson.id, fuse1, fuse2);
+        mapCables.set(cableJson.id, cable);
+    });
 }
 
 function extractEntities(json: GridJson, mapFuses: Map<number, Fuse>, mapEntities: Map<number, Entity>) {
-    // json.entities.forEach((entJson: EntityJson, idx: number) => {
-    //     const type = (entJson.type.toLowerCase() === EntityType.SUBSTATION.toLowerCase())? EntityType.SUBSTATION : EntityType.CABINET;
-    //
-    //     const ent = new Entity(type, entJson.name, entJson.location?.lat, entJson.location?.long);
-    //     entJson.fuses.forEach((fuseId: number) => {
-    //         const fuse = mapFuses.get(fuseId) as Fuse;
-    //         ent.fuses.set(fuseId, fuse);
-    //         if(entJson.location !== undefined) {
-    //             fuse.latitude = entJson.location.lat;
-    //             fuse.longitude = entJson.location.long;
-    //         }
-    //     });
-    //     mapEntities.set(idx, ent);
-    // });
-
     json.entities.forEach((entJson: EntityJson, idx: number) => {
         const type = (entJson.type.toLowerCase() === EntityType.SUBSTATION.toLowerCase())? EntityType.SUBSTATION : EntityType.CABINET;
 
         const fuses = new Array<Fuse>();
         entJson.fuses.forEach((fuseIdx: number) => {
-            fuses.push(mapFuses.get(fuseIdx) as Fuse);
+            const fuse = mapFuses.get(fuseIdx) as Fuse;
+            if(entJson.location !== undefined) {
+                fuse.latitude = entJson.location.lat;
+                fuse.longitude = entJson.location.long;
+            }
+
+            fuses.push(fuse);
         });
 
         const entity = new Entity(idx, type, entJson.name, fuses, entJson.location?.lat, entJson.location?.long);
@@ -112,7 +101,7 @@ function json2Grid(json: GridJson): GridData {
     const metersCons = new Array<number>();
     const mapCables = new Map<number, Cable>();
     const mapMeter = new Map<number, Meter>();
-    extractCables(json, mapFuses, mapCables, mapMeter);
+    extractCables(json, mapFuses, mapCables, meterIdx, mapMeter, metersCons);
 
     //entities
     const mapEntities = new Map<number, Entity>();
