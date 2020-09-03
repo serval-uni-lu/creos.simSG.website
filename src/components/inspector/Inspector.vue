@@ -1,5 +1,5 @@
 <template lang="pug">
-    .testitounet
+    div
         h2 {{selectedElement.name}}
         h3(v-if="nameNotDefault") {{selectedElement.type}} - {{selectedElement.id}}
         .form
@@ -84,9 +84,5 @@
             }
 
         }
-    }
-
-    .testitounet {
-        max-height: 500px;
     }
 </style>
