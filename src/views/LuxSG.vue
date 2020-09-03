@@ -1,6 +1,3 @@
-import {EntityType} from "@/ts/grid";
-import {EntityType} from "@/ts/grid";
-import {ElmtType} from "@/utils/selection";
 <template lang="pug">
     section
         h2 Real-case scenario: Reckange disctrict (Mersch, Luxembourg)
@@ -12,7 +9,7 @@ import {ElmtType} from "@/utils/selection";
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from "vue-property-decorator";
+    import {Component, Vue, Watch} from "vue-property-decorator";
     import Action from "@/components/Action.vue";
     import Inspector from "@/components/inspector/Inspector.vue";
     import {namespace} from "vuex-class";
@@ -32,9 +29,19 @@ import {ElmtType} from "@/utils/selection";
         iconSize: [logoSize, logoSize]
     });
 
+    const iconSubsHover = L.icon({
+        iconUrl: require("@/assets/logos/grids/substation.svg"),
+        iconSize: [logoSizeSelected, logoSizeSelected]
+    });
+
     const iconCabinet = L.icon({
         iconUrl: require("@/assets/logos/grids/cabinet.svg"),
         iconSize: [logoSize, logoSize]
+    });
+
+    const iconCabinetHover = L.icon({
+        iconUrl: require("@/assets/logos/grids/cabinet.svg"),
+        iconSize: [logoSizeSelected, logoSizeSelected]
     });
 
     const iconSubsSelected = L.icon({
@@ -78,12 +85,22 @@ import {ElmtType} from "@/utils/selection";
             return !this.selectedElement.equals(NullSelection);
         }
 
-        // public iconsEntities = new Map<number, L.Marker>();
-        private selectedMarker!: EntityMarker;
+        private selectedMarker: EntityMarker | undefined;
+        private hoverMarker: EntityMarker | undefined;
 
         public created() {
             this.initFromJson(json as GridJson);
             // this.select(new Selection(0, ElmtType.Entity))
+        }
+
+
+        @Watch("selectedElement")
+        public test() {
+            if(this.selectedElement.equals(NullSelection) && this.selectedMarker !== undefined) {
+                const newIcon = (this.selectedMarker.entity.type === EntityType.SUBSTATION)? iconSubs : iconCabinet;
+                this.selectedMarker.setIcon(newIcon);
+                this.selectedMarker = undefined;
+            }
         }
 
         private selectIcon(newMarker: EntityMarker) {
@@ -94,6 +111,18 @@ import {ElmtType} from "@/utils/selection";
             this.selectedMarker = newMarker;
             const newIcon = (newMarker.entity.type === EntityType.SUBSTATION)? iconSubsSelected : iconCabinetSelected;
             this.selectedMarker.setIcon(newIcon);
+        }
+
+        private onHoverIcon(newMarker: EntityMarker) {
+            if(newMarker !== this.selectedMarker) {
+                if (this.hoverMarker !== undefined) {
+                    const newIcon = (this.hoverMarker.entity.type === EntityType.SUBSTATION) ? iconSubs : iconCabinet;
+                    this.hoverMarker.setIcon(newIcon);
+                }
+                this.hoverMarker = newMarker;
+                const newIcon = (newMarker.entity.type === EntityType.SUBSTATION) ? iconSubsHover : iconCabinetHover;
+                this.hoverMarker.setIcon(newIcon);
+            }
         }
 
         public mounted() {
@@ -117,7 +146,11 @@ import {ElmtType} from "@/utils/selection";
                         const marker = event.target as EntityMarker;
                         this.selectIcon(marker);
                         this.select(new Selection(marker.entity.id, ElmtType.Entity, marker.entity.name));
-                    })
+                    });
+                    marker.on("mouseover", (event: L.LeafletMouseEvent) => {
+                        const marker = event.target as EntityMarker;
+                        this.onHoverIcon(marker);
+                    });
                 }
             });
 
