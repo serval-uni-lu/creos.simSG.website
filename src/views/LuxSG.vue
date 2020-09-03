@@ -1,3 +1,5 @@
+import {EntityType} from "@/ts/grid";
+import {EntityType} from "@/ts/grid";
 import {ElmtType} from "@/utils/selection";
 <template lang="pug">
     section
@@ -23,25 +25,34 @@ import {ElmtType} from "@/utils/selection";
     const inspectorState = namespace('InspectorState');
     const gridState = namespace("GridState");
 
-    const logoSize = 25;
+    const logoSize = 35;
+    const logoSizeSelected = 50;
     const iconSubs = L.icon({
-        iconUrl: require("@/assets/logos/grids/substation.png"),
+        iconUrl: require("@/assets/logos/grids/substation.svg"),
         iconSize: [logoSize, logoSize]
     });
 
     const iconCabinet = L.icon({
-        iconUrl: require("@/assets/logos/grids/cabinet.png"),
+        iconUrl: require("@/assets/logos/grids/cabinet.svg"),
         iconSize: [logoSize, logoSize]
     });
 
-    class EntityMarker extends L.Marker {
-        id: number;
-        name: string;
+    const iconSubsSelected = L.icon({
+        iconUrl: require("@/assets/logos/grids/substation-selected.svg"),
+        iconSize: [logoSizeSelected, logoSizeSelected]
+    });
 
-        constructor(latLng: L.LatLngExpression, id: number, name: string, options?: L.MarkerOptions) {
+    const iconCabinetSelected = L.icon({
+        iconUrl: require("@/assets/logos/grids/cabinet-selected.svg"),
+        iconSize: [logoSizeSelected, logoSizeSelected]
+    });
+
+    class EntityMarker extends L.Marker {
+       entity: Entity;
+
+        constructor(latLng: L.LatLngExpression, entity: Entity, options?: L.MarkerOptions) {
             super(latLng, options);
-            this.id = id;
-            this.name = name;
+            this.entity = entity;
         }
 
     }
@@ -67,9 +78,22 @@ import {ElmtType} from "@/utils/selection";
             return !this.selectedElement.equals(NullSelection);
         }
 
+        // public iconsEntities = new Map<number, L.Marker>();
+        private selectedMarker!: EntityMarker;
+
         public created() {
             this.initFromJson(json as GridJson);
             // this.select(new Selection(0, ElmtType.Entity))
+        }
+
+        private selectIcon(newMarker: EntityMarker) {
+            if(this.selectedMarker !== undefined) {
+                const newIcon = (this.selectedMarker.entity.type === EntityType.SUBSTATION)? iconSubs : iconCabinet;
+                this.selectedMarker.setIcon(newIcon);
+            }
+            this.selectedMarker = newMarker;
+            const newIcon = (newMarker.entity.type === EntityType.SUBSTATION)? iconSubsSelected : iconCabinetSelected;
+            this.selectedMarker.setIcon(newIcon);
         }
 
         public mounted() {
@@ -87,12 +111,12 @@ import {ElmtType} from "@/utils/selection";
             this.grid.entities?.forEach((entity: Entity) => {
                 if(entity.latitude !== undefined && entity.longitude !== undefined) {
                     const icon = (entity.type === EntityType.SUBSTATION)? iconSubs : iconCabinet;
-                    // L.marker([entity.latitude, entity.longitude], {icon})
-                    //     .addTo(map);
-                    const marker = new EntityMarker([entity.latitude, entity.longitude], entity.id, entity.name, {icon});
+                    const marker = new EntityMarker([entity.latitude, entity.longitude], entity, {icon});
                     marker.addTo(map);
                     marker.on("click", (event: L.LeafletMouseEvent) => {
-                        this.select(new Selection(event.target.id, ElmtType.Entity, event.target.name));
+                        const marker = event.target as EntityMarker;
+                        this.selectIcon(marker);
+                        this.select(new Selection(marker.entity.id, ElmtType.Entity, marker.entity.name));
                     })
                 }
             });

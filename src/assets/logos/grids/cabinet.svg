@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="-141 70 75 75" width="75" height="75">
+  <defs/>
+  <metadata> Produced by OmniGraffle 7.17.4\n2020-09-03 13:05:58 +0000</metadata>
+  <g id="Cabinet" fill="none" stroke="none" stroke-opacity="1" stroke-dasharray="none" fill-opacity="1">
+    <title>Cabinet</title>
+    <g id="Cabinet_Layer_1">
+      <title>Layer 1</title>
+      <g id="Graphic_10">
+        <circle cx="-103.5" cy="107.5" r="37.5000599213211" fill="white"/>
+      </g>
+      <g id="Graphic_14">
+        <path d="M -90.58229 76.41982 L -102.03287 102.31063 L -85.63969 105.49714 C -84.95255 105.63071 -84.71255 106.49233 -85.21969 107.00499 L -116.1904 138.98302 C -116.46305 139.33751 -116.99478 138.92854 -116.8203 138.55497 L -105.41616 111.3308 L -121.12219 108.27785 C -121.80933 108.14429 -122.04933 107.28266 -121.5422 106.77001 L -91.09494 75.91268 C -90.93953 75.63727 -90.38872 75.948085 -90.58229 76.41982 Z" fill="#ff140b"/>
+      </g>
+    </g>
+  </g>
+</svg>
