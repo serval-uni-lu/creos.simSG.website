@@ -14,10 +14,11 @@
     import Inspector from "@/components/inspector/Inspector.vue";
     import {namespace} from "vuex-class";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-    import L from "leaflet";
-    import {Entity, EntityType, Grid} from "@/ts/grid";
+    import L, {DomEvent, LatLngLiteral, LeafletEventHandlerFn} from "leaflet";
+    import {Cable, Entity, EntityType, Fuse, Grid} from "@/ts/grid";
     import {GridJson} from "@/types/sg-json.types";
     import json from "@/assets/grids/real-case.json";
+    import off = DomEvent.off;
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace("GridState");
@@ -113,8 +114,26 @@
             this.selectedMarker.setIcon(newIcon);
         }
 
+        private quitHover() {
+            if (this.hoverMarker !== undefined && this.hoverMarker.entity !== this.selectedMarker?.entity) {
+                const newIcon = (this.hoverMarker.entity.type === EntityType.SUBSTATION) ? iconSubs : iconCabinet;
+                this.hoverMarker.setIcon(newIcon);
+            }
+            this.hoverMarker = undefined;
+        }
+
         private onHoverIcon(newMarker: EntityMarker) {
-            if(newMarker !== this.selectedMarker) {
+            if(this.selectedMarker !== undefined) {
+                if(newMarker.entity !== this.selectedMarker.entity) {
+                    if (this.hoverMarker !== undefined) {
+                        const newIcon = (this.hoverMarker.entity.type === EntityType.SUBSTATION) ? iconSubs : iconCabinet;
+                        this.hoverMarker.setIcon(newIcon);
+                    }
+                    this.hoverMarker = newMarker;
+                    const newIcon = (newMarker.entity.type === EntityType.SUBSTATION) ? iconSubsHover : iconCabinetHover;
+                    this.hoverMarker.setIcon(newIcon);
+                }
+            } else {
                 if (this.hoverMarker !== undefined) {
                     const newIcon = (this.hoverMarker.entity.type === EntityType.SUBSTATION) ? iconSubs : iconCabinet;
                     this.hoverMarker.setIcon(newIcon);
@@ -123,6 +142,7 @@
                 const newIcon = (newMarker.entity.type === EntityType.SUBSTATION) ? iconSubsHover : iconCabinetHover;
                 this.hoverMarker.setIcon(newIcon);
             }
+
         }
 
         public mounted() {
@@ -137,6 +157,11 @@
             });
             tileLayer.addTo(map);
 
+            map.on("zoom", (event: L.LeafletEvent) => {
+                console.log(event.target._zoom)
+            });
+
+            const cableDone = new Set<number>();
             this.grid.entities?.forEach((entity: Entity) => {
                 if(entity.latitude !== undefined && entity.longitude !== undefined) {
                     const icon = (entity.type === EntityType.SUBSTATION)? iconSubs : iconCabinet;
@@ -151,8 +176,51 @@
                         const marker = event.target as EntityMarker;
                         this.onHoverIcon(marker);
                     });
+                    marker.on("mouseout", (event: L.LeafletMouseEvent) => {
+                        this.quitHover();
+                    });
+
+                    // Todo
+                    // Here the algo. computes the offset based on the idx of the fuse
+                    // but it should group them per parallels cables first
+                    entity.fuses.forEach((fuse: Fuse, idx: number, all: Array<Fuse>) => {
+                        if(fuse.latitude !== undefined && fuse.longitude !== undefined) {
+                            const cable = fuse.cable;
+                            if(!cableDone.has(cable.id)) {
+                                cableDone.add(cable.id);
+                                let geoLine: LatLngLiteral[];
+                                if(all.length == 1) {
+                                    geoLine = [
+                                        {lat: cable.fuse1.latitude as number, lng: cable.fuse1.longitude as number},
+                                        {lat: cable.fuse2.latitude as number, lng: cable.fuse2.longitude as number},
+                                    ]
+                                } else {
+                                    let offset: number;
+                                    if(idx % 2 === 0) {
+                                        offset = (idx/2 + 1);
+                                    } else {
+                                        offset = -((idx+1)/2);
+                                    }
+                                    offset = offset * 0.00002;
+                                    geoLine = [
+                                        {lat: (cable.fuse1.latitude as number) + offset, lng: (cable.fuse1.longitude as number) + offset},
+                                        {lat: (cable.fuse2.latitude as number) + offset, lng: (cable.fuse2.longitude as number) + offset}
+                                    ]
+                                }
+
+                                const a = L.polyline(geoLine, {color: 'black'});
+                                a.addTo(map);
+                            }
+                        }
+
+                    });
+
+
+
+
                 }
             });
+
 
 
         }
