@@ -97,7 +97,6 @@
 
         public uLoads(id: number): Array<ULoadInfo> {
             return uLoadsData(this.fuseULoads(id));
-            // return uLoadsData(this.fuseULoads(this.fuseId));
         }
 
         public show(event: MouseEvent) {

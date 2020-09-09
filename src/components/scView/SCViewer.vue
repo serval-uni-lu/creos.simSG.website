@@ -116,7 +116,7 @@
     }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     svg {
         width: 50%; //todo: to be fixed... https://css-tricks.com/scale-svg/
     }
