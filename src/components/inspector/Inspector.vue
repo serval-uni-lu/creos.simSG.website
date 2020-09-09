@@ -3,10 +3,10 @@
         h2 {{selectedElement.name}}
         h3(v-if="nameNotDefault") {{selectedElement.type}} - {{selectedElement.id}}
         .form
-            FuseInsp(v-if="isFuse" :fuseId="selectedElement.id")
+            FuseInsp(v-if="isFuse")
             MeterInsp(v-else-if="isMeter")
             CableInsp(v-else-if="isCable")
-            EntityInsp(v-else-if="isEntity")
+            ListFuses(v-else-if="isEntity")
         .closingButton(v-on:click="reset()")
             svg
                 use(xlink:href="#close-button")
@@ -21,12 +21,12 @@
     import FuseInsp from "@/components/inspector/FuseInsp.vue";
     import MeterInsp from "@/components/inspector/MeterInsp.vue";
     import CableInsp from "@/components/inspector/CableInsp.vue";
-    import EntityInsp from "@/components/inspector/EntityInsp.vue";
+    import ListFuses from "@/components/inspector/ListFuses.vue";
 
     const inspectorState = namespace('InspectorState');
 
     @Component({
-        components: {EntityInsp, CableInsp, MeterInsp, FuseInsp}
+        components: {ListFuses, CableInsp, MeterInsp, FuseInsp}
     })
     export default class Inspector extends Vue{
 
