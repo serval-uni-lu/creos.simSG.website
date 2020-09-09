@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-    import {Component, Vue, Prop, Watch} from "vue-property-decorator";
+    import {Component, Vue, Prop} from "vue-property-decorator";
     import ToolBar from "@/components/scView/scviewer/ToolBar.vue";
     import SingleCable from "@/components/scView/scviewer/scenarios/SingleCable.vue";
     import Cabinet from "@/components/scView/scviewer/scenarios/Cabinet.vue";
