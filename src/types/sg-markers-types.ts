@@ -19,3 +19,12 @@ export class CableLine extends L.Polyline {
         this.cable = cable;
     }
 }
+
+export class CableMarker extends L.Marker {
+    cableId: number;
+
+    constructor(latLng: L.LatLngExpression, cableId: number, options?: L.MarkerOptions) {
+        super(latLng, options);
+        this.cableId = cableId;
+    }
+}

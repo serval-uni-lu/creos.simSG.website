@@ -3,6 +3,9 @@ import {ElmtType} from "@/utils/selection";
     section
         h2 Real-case scenario: Reckange disctrict (Mersch, Luxembourg)
 
+        .toolbar
+            img.cblFuseLayer(src="@/assets/buttons/infoLayerCable.svg" title="Add a layer with cables information" class="btn btn-secondary" v-bind:class="{active: showCableLayer}" v-on:click="showOrHideCableLayer()")
+
         div#viewer
             Action#action
             #lg-map
@@ -15,18 +18,20 @@ import {ElmtType} from "@/utils/selection";
     import Inspector from "@/components/inspector/Inspector.vue";
     import {namespace} from "vuex-class";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-    import L, {LatLngLiteral} from "leaflet";
-    import {Cable, Entity, Grid} from "@/ts/grid";
+    import L, {LatLngExpression, LatLngLiteral} from "leaflet";
+    import {Cable, Entity, Grid, ULoad} from "@/ts/grid";
     import {GridJson} from "@/types/sg-json.types";
     import json from "@/assets/grids/real-case.json";
     import {extractParaCables, setDefaultStyle, setHoverStyle, setSelectedStyle} from "@/utils/sg-icon-utils";
-    import {CableLine, EntityMarker} from "@/types/sg-markers-types";
+    import {CableLine, CableMarker, EntityMarker} from "@/types/sg-markers-types";
+    import ToolBar from "@/components/scView/scviewer/ToolBar.vue";
+    import {uLoadsData} from "@/utils/uLoadsUtils";
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace("GridState");
 
     @Component({
-        components: {Inspector, Action}
+        components: {ToolBar, Inspector, Action}
     })
     export default class LuxSG extends Vue{
         @inspectorState.State
@@ -41,6 +46,13 @@ import {ElmtType} from "@/utils/selection";
         @gridState.Mutation
         public initFromJson!: (json: GridJson) => void;
 
+        @gridState.Getter
+        public cableULoads!: (id: number) => Array<ULoad>|undefined;
+
+        public showCableLayer = false;
+        public cableLayer = new Array<CableMarker>();
+        private map!: L.Map;
+
         get inspVisible(): boolean {
             return !this.selectedElement.equals(NullSelection);
         }
@@ -48,6 +60,38 @@ import {ElmtType} from "@/utils/selection";
         private selection: EntityMarker | CableLine | undefined;
         private hover: EntityMarker | CableLine | undefined;
 
+        public showOrHideCableLayer() {
+            this.showCableLayer = !this.showCableLayer;
+            if(!this.showCableLayer) {
+                this.cableLayer.forEach((cbl: L.Marker) => cbl.remove())
+            } else {
+                this.cableLayer.forEach((cbl: CableMarker) => {
+                    cbl.setIcon(this.createCableLayer(cbl.cableId))
+                    cbl.addTo(this.map)
+                })
+            }
+        }
+
+        public cableUloadStr(cableId: number): string {
+            const data = uLoadsData(this.cableULoads(cableId));
+            let str = "";
+            for(const d of data) {
+                str += "<li>" + d.value + " A [" + d.confidence + "%]</li>"
+            }
+            return str;
+        }
+
+        private createCableLayer(cableId: number): L.DivIcon {
+            return new L.DivIcon({
+                html:  "<div class='cableInfo'>" +
+                    "    <h4>Cable " + cableId + "</h4>" +
+                    "    <ul>" +
+                        this.cableUloadStr(cableId) +
+                    "    </ul>" +
+                    "</div>",
+                className: ""
+            });
+        }
 
         public created() {
             this.initFromJson(json as GridJson);
@@ -143,6 +187,14 @@ import {ElmtType} from "@/utils/selection";
                         this.quitHover();
                     });
 
+
+                    const pos: LatLngExpression = {
+                        lat: (geoLine[0].lat + geoLine[1].lat) / 2,
+                        lng: (geoLine[0].lng + geoLine[1].lng) / 2
+                    };
+                    const infoA = new CableMarker(pos, cable.id, {draggable: true});
+                    this.cableLayer.push(infoA);
+
                 }
             })
         }
@@ -175,7 +227,7 @@ import {ElmtType} from "@/utils/selection";
         }
 
         public mounted() {
-            const map = L.map("lg-map", {
+            this.map = L.map("lg-map", {
                 center: [49.749219791749525, 6.08051569442007],
                 zoom: 16,
                 zoomControl: false
@@ -184,12 +236,13 @@ import {ElmtType} from "@/utils/selection";
             const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             });
-            tileLayer.addTo(map);
+            tileLayer.addTo(this.map);
 
             const cableDone = new Set<number>();
             this.grid.entities?.forEach((entity: Entity) => {
-                this.drawEntity(entity, cableDone, map)
+                this.drawEntity(entity, cableDone, this.map)
             });
+
         }
 
     }
@@ -199,10 +252,62 @@ import {ElmtType} from "@/utils/selection";
     @import "@/scss/viewer.scss";
     $remaining: calc(100% - (#{$margin} + #{$size-side-elmt}) * 2 - (#{$margin} * 2));
 
+    .btn-secondary, .btn-secondary, .btn-primary:visited {
+        background-color: lightgray !important;
+        border-color: lightgray !important;
+    }
+
+    .btn-secondary.active, .btn-secondary:hover {
+        background-color: gray !important;
+        border-color: gray !important;
+    }
+
     #lg-map {
         width: $remaining;
         margin-bottom: $margin-bottom;
         margin-left: $margin;
         margin-right: $margin;
+    }
+
+    .toolbar {
+        margin-bottom: 10px;
+    }
+
+    .cblFuseLayer {
+        margin-left: 3px;
+        margin-right: 3px;
+        width:  40px;
+        height: 40px;
+        padding: 3px;
+    }
+</style>
+
+<style lang="scss">
+    .cableInfo {
+        background-color: white;
+        width: max-content;
+        border: #6F2683 2px solid;
+        border-radius: 16px;
+        color: #6F2683;
+        padding-left: 10px;
+        padding-right: 10px;
+        h4 {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        ul {
+            margin-top: 0;
+            padding-left: 0;
+            text-align: left;
+            list-style: none;
+        }
+
+        li:before {
+            content: "-";
+            padding-right: 5px;
+        }
     }
 </style>
