@@ -1,6 +1,6 @@
 import {Module, Mutation, VuexModule} from "vuex-module-decorators";
 import {getScNbFuses, Scenario} from "@/ts/scenario";
-import {Cable, ConfidenceLevel, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
+import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
 import {Vue} from "vue-property-decorator";
 import {GridJson} from "@/types/sg-json.types";
 import {GridData, json2Grid} from "@/utils/grid-utils";
@@ -118,6 +118,30 @@ export default class GridState extends VuexModule {
             console.log("Silent error meterCons");
             return -1;
         }
+    }
+
+    @Mutation
+    public initEmpty() {
+        this.grid = NULL_GRID;
+
+        this.meterIdx = new Map<number, number>();
+        this.fuseIdx = new Map<number, number>();
+        this.cableIdx = new Map<number, number>();
+        this.indexesUsed = true;
+
+        this.metersCons = new Array<number>();
+        this.fusesUStatusState = new Array<State>();
+        this.fusesUStatusConf = new Array<ConfidenceLevel>();
+        this.fusesULoads = new Array<Array<ULoad>>();
+        this.cablesULoads = new Array<Array<ULoad>>();
+    }
+
+    @Mutation
+    public addEntity(id: number, type: EntityType) {
+        if(this.grid.entities === undefined) {
+            this.grid.entities = new Map<number, Entity>();
+        }
+        this.grid.entities.set(id, new Entity(id, type, type + " " + id, new Array<Fuse>()));
     }
 
 

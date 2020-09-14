@@ -13,22 +13,28 @@
         Action#action
         .topo-builder
           #network
-        Inspector#inspector
+        Inspector#inspector(v-if="inspVisible")
 
 
 </template>
 
 
 <script lang="ts">
-import {Component, Vue} from "vue-property-decorator";
-    import Action from "@/components/Action.vue";
-    import Inspector from "@/components/inspector/Inspector.vue";
-    import {Network, Edge, Node, DataSet} from "vis-network/standalone";
-    import {Point} from "@/utils/svg-types";
+import {Component, Vue, Watch} from "vue-property-decorator";
+import Action from "@/components/Action.vue";
+import Inspector from "@/components/inspector/Inspector.vue";
+import {DataSet, Edge, Network, Node} from "vis-network/standalone";
+import {Point} from "@/utils/svg-types";
+import {namespace} from "vuex-class";
+import {EntityType} from "@/ts/grid";
+import {ElmtType, NullSelection, Selection} from "@/utils/selection";
 
-    enum EditionMode {
+enum EditionMode {
       NONE = "None", ADD_SUB = "substation", ADD_CABINET = "cabinet", ADD_CABLE = "cable"
     }
+
+    const gridState = namespace("GridState");
+    const inspectorState = namespace('InspectorState');
 
     @Component({
       components: {Inspector, Action}
@@ -41,6 +47,22 @@ import {Component, Vue} from "vue-property-decorator";
 
       public network!: Network;
       public selection: EditionMode = EditionMode.NONE;
+
+      @gridState.Mutation
+      public initEmpty!: () => void;
+
+      @gridState.Mutation
+      public addEntity!: (id: number, type: EntityType) => void;
+
+      @inspectorState.State
+      public selectedElement!: Selection;
+
+      @inspectorState.Mutation
+      public select!: (elmt: Selection) => void;
+
+      get inspVisible(): boolean {
+        return !this.selectedElement.equals(NullSelection);
+      }
 
       public get elmtSelected(): boolean {
         return this.selection !== EditionMode.NONE;
@@ -139,7 +161,6 @@ import {Component, Vue} from "vue-property-decorator";
         this.edges.on("add", () => this.editionMode = EditionMode.NONE)
 
         this.network.on("selectNode", (params) => {
-          console.log(params)
           const id = params.nodes[0];
           const node = this.nodes.get(id) as any;
           if(node.group === "substation") {
@@ -147,6 +168,7 @@ import {Component, Vue} from "vue-property-decorator";
           } else {
             this.selection = EditionMode.ADD_CABINET;
           }
+          this.select(new Selection(id, ElmtType.Entity))
         });
 
         this.network.on("selectEdge", (params) => {
@@ -179,8 +201,14 @@ import {Component, Vue} from "vue-property-decorator";
         });
 
 
+
+
+
       }
 
+      public created() {
+        this.initEmpty();
+      }
 
 
       public addNode(localisation: Point) {
@@ -190,9 +218,13 @@ import {Component, Vue} from "vue-property-decorator";
             x: localisation.x,
             y: localisation.y,
             group: this.editionMode
-          })
-          this.nextNodeId++;
+          });
+          const type = (this.editionMode === EditionMode.ADD_SUB)? EntityType.SUBSTATION : EntityType.CABINET;
+          this.addEntity(this.nextNodeId, type);
           this.editionMode = EditionMode.NONE;
+          this.network.selectNodes([this.nextNodeId], true);
+          this.select(new Selection(this.nextNodeId, ElmtType.Entity))
+          this.nextNodeId++;
         }
       }
 
@@ -215,6 +247,13 @@ import {Component, Vue} from "vue-property-decorator";
         this.network.fit({
           animation: true
         });
+      }
+
+      @Watch("selectedElement")
+      public selectionChanged() {
+        if(this.selectedElement.equals(NullSelection)) {
+          this.network.setSelection({nodes: [], edges: []})
+        }
       }
 
 
