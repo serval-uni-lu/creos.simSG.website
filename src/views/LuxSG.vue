@@ -6,7 +6,7 @@ import {ElmtType} from "@/utils/selection";
         .toolbar
             img.cblFuseLayer(src="@/assets/buttons/infoLayerCable.svg" title="Add a layer with cables information" class="btn btn-secondary" v-bind:class="{active: showCableLayer}" v-on:click="showOrHideCableLayer()")
 
-        div#viewer
+        #viewer
             Action#action
             #lg-map
             Inspector#inspector(v-if="inspVisible")
