@@ -58,7 +58,7 @@
         public fuseId: number | undefined;
 
         get id(): number {
-            return (this.fuseId !== undefined)? this.fuseId : this.selectedElement.id;
+            return (this.fuseId !== undefined)? this.fuseId : this.selectedElement.id as number;
         }
 
         get isClosed() {

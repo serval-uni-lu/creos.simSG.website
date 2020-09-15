@@ -137,8 +137,8 @@ import {ElmtType} from "@/utils/selection";
             // Here the algo. does not keep same distance between cables
             // but the result is sufficient enough for the demo
             paraC.forEach((cable: Cable, idx: number) => {
-                if(!cableDone.has(cable.id)) {
-                    cableDone.add(cable.id);
+                if(!cableDone.has(cable.id as number)) {
+                    cableDone.add(cable.id as number);
 
                     let geoLine: LatLngLiteral[];
                     if(paraC.length == 1) {
@@ -192,7 +192,7 @@ import {ElmtType} from "@/utils/selection";
                         lat: (geoLine[0].lat + geoLine[1].lat) / 2,
                         lng: (geoLine[0].lng + geoLine[1].lng) / 2
                     };
-                    const infoA = new CableMarker(pos, cable.id, {draggable: true});
+                    const infoA = new CableMarker(pos, cable.id as number, {draggable: true});
                     this.cableLayer.push(infoA);
 
                 }

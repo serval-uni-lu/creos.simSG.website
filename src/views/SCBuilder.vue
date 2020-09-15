@@ -13,7 +13,7 @@
         Action#action
         .topo-builder
           #network
-        Inspector#inspector(v-if="inspVisible")
+        EditableInspector#inspector(v-if="inspVisible")
 
 
 </template>
@@ -22,12 +22,14 @@
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator";
 import Action from "@/components/Action.vue";
-import Inspector from "@/components/inspector/Inspector.vue";
 import {DataSet, Edge, Network, Node} from "vis-network/standalone";
 import {Point} from "@/utils/svg-types";
 import {namespace} from "vuex-class";
 import {EntityType} from "@/ts/grid";
 import {ElmtType, NullSelection, Selection} from "@/utils/selection";
+import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
+import {DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
+import {AddEventPayload} from "vis-data/declarations/data-interface";
 
 enum EditionMode {
       NONE = "None", ADD_SUB = "substation", ADD_CABINET = "cabinet", ADD_CABLE = "cable"
@@ -37,9 +39,9 @@ enum EditionMode {
     const inspectorState = namespace('InspectorState');
 
     @Component({
-      components: {Inspector, Action}
+      components: {EditableInspector, Action}
     })
-    export default class Scenarios extends Vue {
+    export default class SCBuilder extends Vue {
       public nodes: DataSet<Node> = new DataSet<Node>();
       public edges: DataSet<Edge> = new DataSet<Edge>();
       public nextNodeId = 0;
@@ -52,7 +54,10 @@ enum EditionMode {
       public initEmpty!: () => void;
 
       @gridState.Mutation
-      public addEntity!: (id: number, type: EntityType) => void;
+      public addEntity!: (data: DataNewEntity) => void;
+
+      @gridState.Mutation
+      public addCable!: (data: DataNewCable) => void;
 
       @inspectorState.State
       public selectedElement!: Selection;
@@ -60,7 +65,10 @@ enum EditionMode {
       @inspectorState.Mutation
       public select!: (elmt: Selection) => void;
 
-      get inspVisible(): boolean {
+      @inspectorState.Mutation
+      public reset!: () => void;
+
+      get  inspVisible(): boolean {
         return !this.selectedElement.equals(NullSelection);
       }
 
@@ -158,7 +166,18 @@ enum EditionMode {
           })
         });
 
-        this.edges.on("add", () => this.editionMode = EditionMode.NONE)
+        this.edges.on("add", (name: "add", payload: AddEventPayload | null) => {
+          this.editionMode = EditionMode.NONE;
+          if(payload !== null) {
+            const edge = this.edges.get(payload.items[0]) as Edge;
+            this.addCable({
+              id: payload.items[0] as string,
+              entityId1: edge.from as number,
+              entityId2: edge.to as number
+            });
+            this.reset();
+          }
+        });
 
         this.network.on("selectNode", (params) => {
           const id = params.nodes[0];
@@ -174,15 +193,16 @@ enum EditionMode {
         this.network.on("selectEdge", (params) => {
           if(params.nodes.length === 0) {
             this.selection = EditionMode.ADD_CABLE;
+            this.select(new Selection(params.edges[0], ElmtType.Cable));
           }
         });
 
         this.network.on("deselectNode", (params) => {
-          console.log(params);
           if(params.edges.length !== 0) {
             this.selection = EditionMode.ADD_CABLE
           } else {
             this.selection = EditionMode.NONE;
+            this.reset();
           }
         });
 
@@ -197,13 +217,18 @@ enum EditionMode {
             }
           } else {
             this.selection = EditionMode.NONE;
+            this.reset();
           }
         });
-        
+
       }
 
       public created() {
         this.initEmpty();
+      }
+
+      public test() {
+        this.network.selectNodes([0], true);
       }
 
 
@@ -216,7 +241,7 @@ enum EditionMode {
             group: this.editionMode
           });
           const type = (this.editionMode === EditionMode.ADD_SUB)? EntityType.SUBSTATION : EntityType.CABINET;
-          this.addEntity(this.nextNodeId, type);
+          this.addEntity({id: this.nextNodeId, type: type});
           this.network.selectNodes([this.nextNodeId], true);
           this.selection = this.editionMode;
           this.editionMode = EditionMode.NONE;

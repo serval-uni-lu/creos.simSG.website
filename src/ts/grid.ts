@@ -14,7 +14,7 @@ interface Named {
 }
 
 class Grid {
-    cables: Map<number, Cable>;
+    cables: Map<number|string, Cable>;
     fuses: Map<number, Fuse>;
     meters: Map<number, Meter>;
     entities?: Map<number, Entity>;
@@ -29,14 +29,14 @@ class Grid {
     }
 }
 
-class Cable implements Identifiable, Named {
+class Cable implements Named {
     fuse1: Fuse;
     fuse2: Fuse;
     meters: Array<Meter>;
-    readonly id: number;
+    readonly id: number|string;
     name: string;
 
-    constructor(id: number, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
+    constructor(id: number|string, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
         this.fuse1 = fuse1;
         this.fuse1.cable = this;
         this.fuse2 = fuse2;
@@ -172,16 +172,12 @@ class Fuse implements Identifiable, Localisable, Named{
     latitude?: number;
     longitude?: number;
     name: string;
-    // status: UStatus;
-    // uloads: Array<ULoad>;
     private _cable!: Cable;
 
 
     constructor(id: number, name: string = "Fuse " + id) {
         this.id = id;
         this.name = name;
-        // this.status = new UStatus(state, confidence);
-        // this.uloads = new Array<ULoad>();
     }
 
     public get cable(): Cable {
@@ -194,10 +190,6 @@ class Fuse implements Identifiable, Localisable, Named{
         }
         this._cable = cable;
     }
-
-    // public isClosed(): boolean {
-    //     return this.status.isClosed();
-    // }
 
 }
 

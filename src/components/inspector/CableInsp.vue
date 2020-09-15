@@ -34,7 +34,7 @@
 
 
         public getCableULoads(): Array<ULoadInfo> {
-            return uLoadsData(this.cableULoads(this.selectedElement.id));
+            return uLoadsData(this.cableULoads(this.selectedElement.id as number));
         }
 
         get fusesId(): Array<number> {

@@ -30,7 +30,7 @@
 
         get fusesId(): Array<number> {
             if(this.selectedElement.type === ElmtType.Entity) {
-                const ent: Entity|undefined = this.grid.entities?.get(this.selectedElement.id);
+                const ent: Entity|undefined = this.grid.entities?.get(this.selectedElement.id as number);
                 if(ent !== undefined) {
                     const ids = new Array<number>();
                     ent.fuses.forEach((fuse: Fuse) => {

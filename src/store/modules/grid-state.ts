@@ -10,6 +10,17 @@ export interface UpdateNumVal {
     newValue: number;
 }
 
+export interface DataNewEntity {
+    id: number;
+    type: EntityType;
+}
+
+export interface DataNewCable {
+    id: string;
+    entityId1: number;
+    entityId2: number;
+}
+
 
 const NULL_GRID: Grid = new Grid(
     new Map<number, Cable>(),
@@ -37,7 +48,7 @@ export default class GridState extends VuexModule {
 
     public meterIdx = new Map<number, number>();
     public fuseIdx = new Map<number, number>();
-    public cableIdx = new Map<number, number>();
+    public cableIdx = new Map<number|string, number>();
     public indexesUsed!: boolean;
 
     public metersCons = new Array<number>();
@@ -45,6 +56,7 @@ export default class GridState extends VuexModule {
     public fusesUStatusConf = new Array<ConfidenceLevel>();
     public fusesULoads = new Array<Array<ULoad>>();
     public cablesULoads = new Array<Array<ULoad>>();
+
 
     get fuseState() {
         return (id: number): State => {
@@ -137,14 +149,39 @@ export default class GridState extends VuexModule {
     }
 
     @Mutation
-    public addEntity(id: number, type: EntityType) {
+    public addEntity(data: DataNewEntity) {
         if(this.grid.entities === undefined) {
             this.grid.entities = new Map<number, Entity>();
         }
-        this.grid.entities.set(id, new Entity(id, type, type + " " + id, new Array<Fuse>()));
+        this.grid.entities.set(data.id, new Entity(data.id, data.type, data.type + " " + data.id, new Array<Fuse>()));
     }
 
+    @Mutation
+    public addCable(data: DataNewCable) {
+        let fuseId = this.fusesUStatusConf.length;
+        const fuse1 = new Fuse(fuseId);
+        this.grid.fuses.set(fuseId, fuse1);
+        this.fusesUStatusConf.push(new ConfidenceLevel());
+        this.fusesUStatusState.push(State.CLOSED);
+        this.fuseIdx.set(fuseId, fuseId);
 
+        fuseId = this.fusesUStatusConf.length;
+        const fuse2 = new Fuse(fuseId);
+        this.grid.fuses.set(fuseId, fuse2);
+        this.fusesUStatusConf.push(new ConfidenceLevel());
+        this.fusesUStatusState.push(State.CLOSED);
+        this.fuseIdx.set(fuseId, fuseId);
+
+        this.grid.cables.set(data.id, new Cable(data.id, fuse1, fuse2, "Cable"));
+        this.cableIdx.set(data.id, this.cablesULoads.length);
+        this.cablesULoads.push([]);
+
+        const entity1 = this.grid.entities?.get(data.entityId1) as Entity;
+        const entity2 = this.grid.entities?.get(data.entityId2) as Entity;
+
+        entity1.fuses.push(fuse1);
+        entity2.fuses.push(fuse2);
+    }
 
     @Mutation
     public initFromScenario(scenario: Scenario) {

@@ -27,11 +27,11 @@
         public updateConsumption!: (data: UpdateNumVal) => void;
 
         get consumption(): number {
-            return this.meterCons(this.selectedElement.id);
+            return this.meterCons(this.selectedElement.id as number);
         }
 
         set consumption(newCons: number) {
-            this.updateConsumption({id: this.selectedElement.id, newValue: newCons});
+            this.updateConsumption({id: this.selectedElement.id as number, newValue: newCons});
         }
     }
 </script>
