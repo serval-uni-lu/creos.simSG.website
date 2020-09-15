@@ -199,11 +199,7 @@ enum EditionMode {
             this.selection = EditionMode.NONE;
           }
         });
-
-
-
-
-
+        
       }
 
       public created() {
@@ -221,8 +217,9 @@ enum EditionMode {
           });
           const type = (this.editionMode === EditionMode.ADD_SUB)? EntityType.SUBSTATION : EntityType.CABINET;
           this.addEntity(this.nextNodeId, type);
-          this.editionMode = EditionMode.NONE;
           this.network.selectNodes([this.nextNodeId], true);
+          this.selection = this.editionMode;
+          this.editionMode = EditionMode.NONE;
           this.select(new Selection(this.nextNodeId, ElmtType.Entity))
           this.nextNodeId++;
         }
@@ -241,6 +238,7 @@ enum EditionMode {
       public deleteElmt() {
         this.network.deleteSelected();
         this.selection = EditionMode.NONE;
+        this.select(NullSelection);
       }
 
       public fit() {
