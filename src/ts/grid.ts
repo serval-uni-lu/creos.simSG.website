@@ -29,14 +29,14 @@ class Grid {
     }
 }
 
-class Cable implements Named {
+class Cable implements Identifiable, Named {
     fuse1: Fuse;
     fuse2: Fuse;
     meters: Array<Meter>;
-    readonly id: number|string;
+    readonly id: number;
     name: string;
 
-    constructor(id: number|string, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
+    constructor(id: number, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
         this.fuse1 = fuse1;
         this.fuse1.cable = this;
         this.fuse2 = fuse2;

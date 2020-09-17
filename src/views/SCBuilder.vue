@@ -22,7 +22,7 @@
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator";
 import Action from "@/components/Action.vue";
-import {DataSet, Edge, Network, Node} from "vis-network/standalone";
+import {DataSet, Edge, IdType, Network, Node} from "vis-network/standalone";
 import {Point} from "@/utils/svg-types";
 import {namespace} from "vuex-class";
 import {EntityType} from "@/ts/grid";
@@ -45,6 +45,7 @@ enum EditionMode {
       public nodes: DataSet<Node> = new DataSet<Node>();
       public edges: DataSet<Edge> = new DataSet<Edge>();
       public nextNodeId = 0;
+      public nextCableId = -1;
       public editionMode: EditionMode = EditionMode.NONE;
 
       public network!: Network;
@@ -140,6 +141,11 @@ enum EditionMode {
               color: {
                 border: "#FF140B"
               }
+            },
+            cable: {
+              shape: "dot",
+              color: "black",
+              size: 5
             }
           },
           edges: {
@@ -158,67 +164,114 @@ enum EditionMode {
           }
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
         this.network.on("click", (params?: any) => {
-          this.addNode({
-            x: params.pointer.canvas.x,
-            y: params.pointer.canvas.y
-          })
+          if(this.editionMode === EditionMode.ADD_SUB || this.editionMode === EditionMode.ADD_CABINET ) {
+            this.addNode({
+              x: params.pointer.canvas.x,
+              y: params.pointer.canvas.y
+            })
+          }
         });
 
         this.edges.on("add", (name: "add", payload: AddEventPayload | null) => {
           this.editionMode = EditionMode.NONE;
           if(payload !== null) {
             const edge = this.edges.get(payload.items[0]) as Edge;
-            this.addCable({
-              id: payload.items[0] as string,
-              entityId1: edge.from as number,
-              entityId2: edge.to as number
-            });
-            this.reset();
+            const from = this.nodes.get(edge.from as number) as Node;
+            const to = this.nodes.get(edge.to as number) as Node;
+
+            if (from.id === to.id || (from.group === "cable" && to.group === "cable")) {
+              this.edges.remove(payload.items[0]);
+            } else if ((from.group === "substation" || from.group === "cabinet") && (to.group === "substation" || to.group === "cabinet")) {
+              const ids: IdType[] = this.nodes.add({
+                id: this.nextCableId,
+                x: (from.x !== undefined) ? from.x + 10 : 0,
+                y: (from.y !== undefined) ? from.y + 10 : 0,
+                group: "cable"
+              });
+
+              this.addCable({
+                id: this.nextCableId,
+                entityId1: edge.from as number,
+                entityId2: edge.to as number
+              });
+              this.nextCableId--;
+
+              this.edges.add([
+                {from: from.id, to: ids[0]},
+                {from: ids[0], to: to.id}
+              ]);
+
+              this.reset();
+              this.edges.remove(payload.items[0]);
+              this.network.selectNodes(ids, true);
+            } else {
+              const cableNode = (from.group === "cable")? from : to;
+              if(this.network.getConnectedEdges(cableNode.id as number).length > 2) {
+                this.edges.remove(payload.items[0]);
+              }
+            }
           }
         });
 
         this.network.on("selectNode", (params) => {
           const id = params.nodes[0];
-          const node = this.nodes.get(id) as any;
+          const node = this.nodes.get(id) as Node;
           if(node.group === "substation") {
             this.selection = EditionMode.ADD_SUB;
-          } else {
+            this.select(new Selection(id, ElmtType.Entity))
+          } else if(node.group === "cabinet") {
             this.selection = EditionMode.ADD_CABINET;
+            this.select(new Selection(id, ElmtType.Entity))
+          } else { // cable
+            this.selection = EditionMode.ADD_CABLE;
+            this.select(new Selection(id, ElmtType.Cable))
           }
-          this.select(new Selection(id, ElmtType.Entity))
         });
 
         this.network.on("selectEdge", (params) => {
           if(params.nodes.length === 0) {
+            const edge = this.edges.get(params.edges[0]) as Edge;
+            const from = this.nodes.get(edge.from as number) as Node;
+
+            let cableId;
+            if(from.group === "cable") {
+              this.network.selectNodes([from.id as number], true);
+              cableId = from.id as number;
+            } else {
+              const to = this.nodes.get(edge.to as number) as Node;
+              this.network.selectNodes([to.id as number], true);
+              cableId = to.id as number;
+            }
             this.selection = EditionMode.ADD_CABLE;
-            this.select(new Selection(params.edges[0], ElmtType.Cable));
+            this.select(new Selection(cableId, ElmtType.Cable));
           }
         });
 
         this.network.on("deselectNode", (params) => {
-          if(params.edges.length !== 0) {
-            this.selection = EditionMode.ADD_CABLE
-          } else {
-            this.selection = EditionMode.NONE;
-            this.reset();
-          }
+          // if(params.edges.length !== 0) {
+          //   this.selection = EditionMode.ADD_CABLE
+          // } else {
+          //   this.selection = EditionMode.NONE;
+          //   this.reset();
+          // }
+          this.selection = EditionMode.NONE;
+          this.reset();
         });
 
         this.network.on("deselectEdge", (params) => {
-          if(params.nodes.length !== 0) {
-            const id = params.nodes[0];
-            const node = this.nodes.get(id) as any;
-            if(node.group === "substation") {
-              this.selection = EditionMode.ADD_SUB;
-            } else {
-              this.selection = EditionMode.ADD_CABINET;
-            }
-          } else {
-            this.selection = EditionMode.NONE;
-            this.reset();
-          }
+          // if(params.nodes.length !== 0) {
+          //   const id = params.nodes[0];
+          //   const node = this.nodes.get(id) as any;
+          //   if(node.group === "substation") {
+          //     this.selection = EditionMode.ADD_SUB;
+          //   } else {
+          //     this.selection = EditionMode.ADD_CABINET;
+          //   }
+          // } else {
+          //   this.selection = EditionMode.NONE;
+          //   this.reset();
+          // }
         });
 
       }
@@ -233,7 +286,6 @@ enum EditionMode {
 
 
       public addNode(localisation: Point) {
-        if(this.editionMode === EditionMode.ADD_SUB || this.editionMode === EditionMode.ADD_CABINET ) {
           this.nodes.add({
             id: this.nextNodeId,
             x: localisation.x,
@@ -247,7 +299,6 @@ enum EditionMode {
           this.editionMode = EditionMode.NONE;
           this.select(new Selection(this.nextNodeId, ElmtType.Entity))
           this.nextNodeId++;
-        }
       }
 
       public setAddCable() {

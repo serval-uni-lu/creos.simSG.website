@@ -16,7 +16,7 @@ export interface DataNewEntity {
 }
 
 export interface DataNewCable {
-    id: string;
+    id: number;
     entityId1: number;
     entityId2: number;
 }
@@ -48,7 +48,7 @@ export default class GridState extends VuexModule {
 
     public meterIdx = new Map<number, number>();
     public fuseIdx = new Map<number, number>();
-    public cableIdx = new Map<number|string, number>();
+    public cableIdx = new Map<number, number>();
     public indexesUsed!: boolean;
 
     public metersCons = new Array<number>();
