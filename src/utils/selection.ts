@@ -7,12 +7,12 @@ export enum ElmtType {
 }
 
 export class Selection {
-    id: number|string;
+    id: number;
     type: ElmtType;
     name: string;
 
 
-    constructor(id: number|string, type: ElmtType, name= type + " - " + id) {
+    constructor(id: number, type: ElmtType, name= type + " - " + id) {
         this.id = id;
         this.type = type;
         this.name = name;

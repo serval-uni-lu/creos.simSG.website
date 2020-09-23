@@ -1,6 +1,9 @@
 <template lang="pug">
     div
         ListFuses
+        h4.collapseAct(v-on:click="show($event)" class="active") Meters
+        .collapsible
+          MeterInsp(v-for="m in getMetersData()" :key="m.id" :meterId="m.meterId")
         h4.collapseAct(v-on:click="show($event)" class="active") ULoads
         .collapsible
             span(v-for="ul in getCableULoads()" :key="ul.id")  - {{ul.value}} A [{{ul.confidence}} %] <br/>
@@ -11,15 +14,24 @@
     import {namespace} from "vuex-class";
     import {ULoadInfo, uLoadsData} from "@/utils/uLoadsUtils";
     import {Selection} from "@/utils/selection";
-    import {Cable, Grid, ULoad} from "@/ts/grid";
+    import {Cable, Grid, Meter, ULoad} from "@/ts/grid";
     import FuseInsp from "@/components/inspector/FuseInsp.vue";
     import {open} from "@/utils/collapse-utils";
     import ListFuses from "@/components/inspector/ListFuses.vue";
+    import MeterInsp from "@/components/inspector/MeterInsp.vue";
 
     const inspectorState = namespace('InspectorState');
     const gridState = namespace('GridState');
+
+    interface MeterData {
+      id: number;
+      meterId: number;
+      name: string;
+    }
+
+
     @Component({
-        components: {ListFuses, FuseInsp}
+        components: {MeterInsp, ListFuses, FuseInsp}
     })
     export default class CableInsp extends Vue {
 
@@ -29,12 +41,26 @@
         @gridState.Getter
         public cableULoads!: (id: number) => Array<ULoad>;
 
+        @gridState.Getter
+        public meters!: (cableId: number) => Array<Meter>;
+
+
         @gridState.State
         public grid!: Grid;
 
 
         public getCableULoads(): Array<ULoadInfo> {
             return uLoadsData(this.cableULoads(this.selectedElement.id as number));
+        }
+
+        public getMetersData(): Array<MeterData> {
+          const res = new Array<MeterData>();
+
+          this.meters(this.selectedElement.id).forEach((meter: Meter, idx: number) => {
+            res.push({id: idx, meterId: meter.id, name: meter.name})
+          });
+
+          return res;
         }
 
         get fusesId(): Array<number> {

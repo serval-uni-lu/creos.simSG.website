@@ -4,7 +4,8 @@
     h3 {{selectedElement.type}} - {{selectedElement.id}}
     .form
       CableInsp(v-if="isCable")
-      ListFuses(v-else)
+      ListFuses(v-else-if="isEntity")
+      MeterInsp(v-else-if="isMeter")
 
     .closingButton(v-on:click="reset()")
       svg
@@ -14,16 +15,17 @@
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator";
 import {namespace} from "vuex-class";
-import {Cable, Entity, Grid} from "@/ts/grid";
+import {Cable, Entity, Grid, Meter} from "@/ts/grid";
 import {ElmtType, Selection} from "@/utils/selection";
 import ListFuses from "@/components/inspector/ListFuses.vue";
 import CableInsp from "@/components/inspector/CableInsp.vue";
+import MeterInsp from "@/components/inspector/MeterInsp.vue";
 
 const gridState = namespace('GridState')
   const inspectorState = namespace('InspectorState');
 
   @Component({
-    components: {CableInsp, ListFuses}
+    components: {MeterInsp, CableInsp, ListFuses}
   })
   export default class EditableInspector extends Vue {
     @gridState.State
@@ -36,28 +38,44 @@ const gridState = namespace('GridState')
     public reset!: () => void;
 
     public get name(): string {
-      if(this.selectedElement.type === ElmtType.Entity) {
+      if(this.isEntity) {
         return ((this.grid.entities as Map<number, Entity>)
           .get(this.selectedElement.id as number) as Entity).name
-      } else {
+      } else if (this.isCable) {
         return (this.grid.cables.get(this.selectedElement.id) as Cable).name
+      } else if(this.isMeter) {
+        return (this.grid.meters.get(this.selectedElement.id) as Meter).name
       }
+
+      return "ERROR"; //should not be executed
 
     }
 
     public setName(event: InputEvent) {
       const newName = (event.target as HTMLElement).innerText;
-      if(this.selectedElement.type === ElmtType.Entity) {
+      if(this.isEntity) {
         ((this.grid.entities as Map<number, Entity>)
             .get(this.selectedElement.id as number) as Entity).name = newName;
+      } else if(this.isCable) {
+        (this.grid.cables.get(this.selectedElement.id) as Cable).name = newName;
+      } else if(this.isMeter) {
+        (this.grid.meters.get(this.selectedElement.id) as Meter).name = newName;
       } else {
-        (this.grid.cables.get(this.selectedElement.id) as Cable).name = newName
+        console.log("Silent error: setName");
       }
 
     }
 
     get isCable(): boolean {
       return this.selectedElement.type === ElmtType.Cable;
+    }
+
+    get isEntity(): boolean {
+      return this.selectedElement.type === ElmtType.Entity;
+    }
+
+    get isMeter(): boolean {
+      return this.selectedElement.type === ElmtType.Meter
     }
 
   }

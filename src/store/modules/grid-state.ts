@@ -21,6 +21,11 @@ export interface DataNewCable {
     entityId2: number;
 }
 
+export interface DataConnCblMeter {
+    meterId: number;
+    cableId: number;
+}
+
 
 const NULL_GRID: Grid = new Grid(
     new Map<number, Cable>(),
@@ -132,6 +137,18 @@ export default class GridState extends VuexModule {
         }
     }
 
+    get meterName() {
+        return (id: number): string => {
+            return (this.grid.meters.get(id) as Meter).name;
+        }
+    }
+
+    get meters() {
+        return (cableId: number): Array<Meter> => {
+            return (this.grid.cables.get(cableId) as Cable).meters;
+        }
+    }
+
     @Mutation
     public initEmpty() {
         this.grid = NULL_GRID;
@@ -181,6 +198,21 @@ export default class GridState extends VuexModule {
 
         entity1.fuses.push(fuse1);
         entity2.fuses.push(fuse2);
+    }
+
+    @Mutation
+    public addMeter(id: number) {
+        const meter = new Meter(id);
+        this.grid.meters.set(id, meter);
+        this.meterIdx.set(id, this.metersCons.length);
+        this.metersCons.push(0.);
+    }
+
+    @Mutation
+    public connectMeter2Cable(data: DataConnCblMeter) {
+        const cable = this.grid.cables.get(data.cableId) as Cable;
+        const meter = this.grid.meters.get(data.meterId) as Meter;
+        cable.meters.push(meter);
     }
 
     @Mutation

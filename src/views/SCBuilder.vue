@@ -21,19 +21,17 @@
 
 
 <script lang="ts">
-    import {Component, Vue, Watch} from "vue-property-decorator";
-    import Action from "@/components/Action.vue";
-    import {DataSet, Edge, IdType, Network, Node} from "vis-network/standalone";
-    import {Point} from "@/utils/svg-types";
-    import {namespace} from "vuex-class";
-    import {EntityType} from "@/ts/grid";
-    import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-    import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
-    import {DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
-    import {AddEventPayload} from "vis-data/declarations/data-interface";
-    import {easingFunctions} from "vis-util";
+import {Component, Vue, Watch} from "vue-property-decorator";
+import Action from "@/components/Action.vue";
+import {DataSet, Edge, IdType, Network, Node} from "vis-network/standalone";
+import {Point} from "@/utils/svg-types";
+import {namespace} from "vuex-class";
+import {EntityType} from "@/ts/grid";
+import {ElmtType, NullSelection, Selection} from "@/utils/selection";
+import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
+import {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
 
-    enum EditionMode {
+enum EditionMode {
       NONE = "None", ADD_SUB = "substation", ADD_CABINET = "cabinet", ADD_CABLE = "cable", ADD_METER = "meter"
     }
 
@@ -61,6 +59,12 @@
 
       @gridState.Mutation
       public addCable!: (data: DataNewCable) => void;
+
+      @gridState.Mutation
+      public addMeter!: (id: number) => void;
+
+      @gridState.Mutation
+      public connectMeter2Cable!: (data: DataConnCblMeter) => void;
 
       @inspectorState.State
       public selectedElement!: Selection;
@@ -189,17 +193,53 @@
               }
             }
           },
-          // manipulation: {
-          //   // addEdge: function(edgeData: any, callback: any) {
-          //   //   console.log(edgeData.constructor.name);
-          //   //   console.log(typeof edgeData);
-          //   //   console.log(callback.constructor.name);
-          //   //   console.log(typeof callback);
-          //   //   edgeData.dashes = true;
-          //   //   console.log(edgeData);
-          //   //   callback(edgeData);
-          //   // }
-          // }
+          manipulation: {
+            enabled: false,
+            // eslint-disable-next-line
+            addEdge: (edgeData: {from: number, to: number}, callback: (data: {from: number, to: number}) => void) => {
+              this.editionMode = EditionMode.NONE;
+              const from = this.nodes.get(edgeData.from) as Node;
+              const to = this.nodes.get(edgeData.to) as Node;
+
+              if(from.id !== to.id && !(from.group === "cable" && to.group === "cable") && !(from.group === "meter" && to.group === "meter")) {
+                if((from.group === "substation" || from.group === "cabinet") && (to.group === "substation" || to.group === "cabinet")) {
+                  const ids: IdType[] = this.nodes.add({
+                    id: this.nextCableId,
+                    x: (from.x !== undefined) ? from.x + 10 : 0,
+                    y: (from.y !== undefined) ? from.y + 10 : 0,
+                    group: "cable"
+                  });
+                  this.network.addEdgeMode();
+                  this.addCable({
+                    id: this.nextCableId,
+                    entityId1: from.id as number,
+                    entityId2: to.id as number
+                  });
+                  this.nextCableId--;
+                  this.edges.add([
+                    {from: from.id, to: ids[0]},
+                    {from: ids[0], to: to.id}
+                  ]);
+                  this.reset();
+                  this.selection = EditionMode.NONE;
+                } else if((from.group === "meter" && to.group === "cable") || (to.group === "meter" && from.group === "cable")) {
+                  const n = this.network.getConnectedNodes(from.id as number) as IdType[];
+                  if (!n.includes(to.id as IdType)) {
+                    this.edges.add({
+                      from: edgeData.from,
+                      to: edgeData.to,
+                      dashes: true
+                    });
+
+                    const data: DataConnCblMeter = (from.group === "cable")? {cableId: from.id as number, meterId: to.id as number} : {cableId: to.id as number, meterId: from.id as number};
+                    this.connectMeter2Cable(data);
+
+
+                  }
+                }
+              }
+            }
+          }
         });
 
         // eslint-disable-next-line
@@ -209,70 +249,6 @@
               x: params.pointer.canvas.x,
               y: params.pointer.canvas.y
             })
-          }
-        });
-
-        this.edges.on("add", (name: "add", payload: AddEventPayload | null) => {
-          this.editionMode = EditionMode.NONE;
-          if(payload !== null) {
-            const edge = this.edges.get(payload.items[0]) as Edge;
-            const from = this.nodes.get(edge.from as number) as Node;
-            const to = this.nodes.get(edge.to as number) as Node;
-
-            if (from.id === to.id || (from.group === "cable" && to.group === "cable") || (from.group === "meter" && to.group === "meter")) {
-              this.edges.remove(payload.items[0]);
-            } else if ((from.group === "substation" || from.group === "cabinet") && (to.group === "substation" || to.group === "cabinet")) {
-              const ids: IdType[] = this.nodes.add({
-                id: this.nextCableId,
-                x: (from.x !== undefined) ? from.x + 10 : 0,
-                y: (from.y !== undefined) ? from.y + 10 : 0,
-                group: "cable"
-              });
-
-              this.addCable({
-                id: this.nextCableId,
-                entityId1: edge.from as number,
-                entityId2: edge.to as number
-              });
-              this.nextCableId--;
-
-              this.edges.add([
-                {from: from.id, to: ids[0]},
-                {from: ids[0], to: to.id}
-              ]);
-
-              this.reset();
-              this.selection = EditionMode.NONE;
-              this.edges.remove(payload.items[0]);
-            } else if(from.group === "meter" || to.group === "meter") {
-              if(edge.dashes === undefined) { //todo finished
-                this.edges.remove(payload.items[0]);
-                this.edges.add([{
-                  from: edge.from,
-                  to: edge.to,
-                  dashes: true
-                }]);
-              }
-              // const other = (from.group === "meter")? to : from;
-              // console.log(edge.dashes);
-              // if(other.group !== "cable") {
-              //   // this.edges.remove(payload.items[0]);
-              //   if(edge.dashes === undefined) {
-              //     this.edges.add([{
-              //       from: edge.from,
-              //       to: edge.to,
-              //       dashes: true
-              //     }]);
-              //   }
-              // } else {
-              //   edge.dashes = true;
-              // }
-            } else {
-              const cableNode = (from.group === "cable")? from : to;
-              if(this.network.getConnectedEdges(cableNode.id as number).length > 2) {
-                this.edges.remove(payload.items[0]);
-              }
-            }
           }
         });
 
@@ -293,9 +269,12 @@
               const cables = this.network.getConnectedNodes(node.id as number) as IdType[];
               cables.push(node.id as number);
               this.network.selectNodes(cables, true);
-            } else { // cable
+            } else if(node.group === "cable") {
               this.selection = EditionMode.ADD_CABLE;
               this.select(new Selection(id, ElmtType.Cable));
+            } else if(node.group === "meter") {
+              this.selection = EditionMode.ADD_METER;
+              this.select(new Selection(id, ElmtType.Meter));
             }
           }
         });
@@ -346,7 +325,8 @@
             group: this.editionMode
           });
           if(this.editionMode === EditionMode.ADD_METER) {
-            // TODO
+            this.addMeter(this.nextNodeId);
+            this.select(new Selection(this.nextNodeId, ElmtType.Meter));
           } else {
             const type = (this.editionMode === EditionMode.ADD_SUB) ? EntityType.SUBSTATION : EntityType.CABINET;
             this.addEntity({id: this.nextNodeId, type: type});
@@ -364,6 +344,7 @@
           this.network.addEdgeMode();
           this.editionMode = EditionMode.ADD_CABLE;
         } else {
+          console.log("Oups");
           this.network.disableEditMode();
           this.editionMode = EditionMode.NONE;
         }
