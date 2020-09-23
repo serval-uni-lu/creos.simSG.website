@@ -83,6 +83,12 @@
         text-align: left;
     }
 
+    .collapsible {
+      div {
+        margin-bottom: 10px;
+      }
+    }
+
     .line {
         width: 95%;
         margin: 10px auto;
