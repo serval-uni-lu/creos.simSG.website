@@ -2,7 +2,7 @@ import {Module, Mutation, VuexModule} from "vuex-module-decorators";
 import {getScNbFuses, Scenario} from "@/ts/scenario";
 import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
 import {Vue} from "vue-property-decorator";
-import {GridJson} from "@/types/sg-json.types";
+import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/types/sg-json.types";
 import {GridData, json2Grid} from "@/utils/grid-utils";
 
 export interface UpdateNumVal {
@@ -42,6 +42,8 @@ function _getFuseState(state: GridState, id: number): State {
     }
     return State.CLOSED;
 }
+
+
 
 
 
@@ -149,6 +151,65 @@ export default class GridState extends VuexModule {
         }
     }
 
+    get gridJson() {
+        const entities: EntityJson[] = new Array<EntityJson>();
+        this.grid.entities?.forEach((entity: Entity) => {
+            const jsonEnt: EntityJson = {
+                name: entity.name,
+                type: entity.type,
+                fuses: entity.fuses.map((fuse: Fuse) => fuse.id)
+            };
+            if(entity.latitude !== undefined && entity.longitude !== undefined) {
+                jsonEnt.location = {lat: entity.latitude, long: entity.longitude}
+            }
+            entities.push(jsonEnt);
+        });
+
+        const fuses: FuseJson[] = new Array<FuseJson>();
+        this.grid.fuses.forEach((fuse: Fuse) => {
+            const jsonFuse: FuseJson = {
+                id: fuse.id,
+                name: fuse.name,
+                state: {status: this.fuseState(fuse.id), confidence: this.fuseConfLevel(fuse.id)},
+            };
+            const load = this.fuseULoads(fuse.id);
+            if(load != undefined) {
+                jsonFuse.load = new Array<LoadJson>();
+                load.forEach((ul: ULoad) => {
+                    jsonFuse.load?.push({
+                        confidence: ul.confidence.level,
+                        value: ul.load
+                    })
+                })
+            }
+            fuses.push(jsonFuse);
+        });
+
+        const cables: CableJson[] = new Array<CableJson>();
+        this.grid.cables.forEach((cable: Cable) => {
+            const cableJson: CableJson = {
+                id: cable.id,
+                fuses: [cable.fuse1.id, cable.fuse2.id]
+            };
+
+            cableJson.meters = cable.meters.map((meter: Meter) => {
+                const json: MeterJson = {
+                    name: meter.name,
+                    consumption: this.meterCons(meter.id)
+                };
+
+                if(meter.latitude !== -1 && meter.longitude !== -1) {
+                    json.location = {lat: meter.latitude, long: meter.longitude};
+                }
+
+                return json;
+            });
+            cables.push(cableJson);
+        });
+
+        return JSON.stringify({entities, fuses, cables}, undefined, 2)
+    }
+
     @Mutation
     public initEmpty() {
         this.grid = NULL_GRID;
@@ -198,6 +259,8 @@ export default class GridState extends VuexModule {
 
         entity1.fuses.push(fuse1);
         entity2.fuses.push(fuse2);
+
+        console.log(this.grid.fuses);
     }
 
     @Mutation

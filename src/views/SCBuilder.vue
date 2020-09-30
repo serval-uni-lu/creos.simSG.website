@@ -3,12 +3,14 @@
       h2 Topology builder
 
       .toolbar
-        img.cblFuseLayer(src="@/assets/buttons/addSubs.svg" title="Add a substation" class="btn btn-secondary" v-on:click="setAddSubMode()" v-bind:class="{active: addSubActive}")
-        img.cblFuseLayer(src="@/assets/buttons/addCabinet.svg" title="Add a cabinet" class="btn btn-secondary" v-on:click="setAddSubCabinet()" v-bind:class="{active: addCabActive}")
-        img.cblFuseLayer(src="@/assets/buttons/addCable.svg" title="Add a cable" class="btn btn-secondary" v-on:click="setAddCable()" v-bind:class="{active: addCableActive}")
-        img.cblFuseLayer(src="@/assets/buttons/addMeter.svg" title="Add a meter" class="btn btn-secondary" v-on:click="setAddMeter()" v-bind:class="{active: addMeterActive}")
-        img.cblFuseLayer(:src="imageDel" :title="titleDel" class="btn btn-secondary" v-on:click="deleteElmt()" v-if="elmtSelected")
-        img.cblFuseLayer(src="@/assets/buttons/fitGrid.svg" title="Fit the grid in the window" class="btn btn-secondary" v-on:click="fit()")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addSubs.svg" title="Add a substation" v-on:click="setAddSubMode()" v-bind:class="{active: addSubActive}")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addCabinet.svg" title="Add a cabinet" v-on:click="setAddSubCabinet()" v-bind:class="{active: addCabActive}")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addCable.svg" title="Add a cable" v-on:click="setAddCable()" v-bind:class="{active: addCableActive}")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addMeter.svg" title="Add a meter" v-on:click="setAddMeter()" v-bind:class="{active: addMeterActive}")
+        img.cblFuseLayer.btn.btn-secondary(:src="imageDel" :title="titleDel" class="btn btn-secondary" v-on:click="deleteElmt()" v-if="elmtSelected")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/fitGrid.svg" title="Fit the grid in the window" class="btn btn-secondary" v-on:click="fit()")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/download.svg" title="Export the grid to a JSON file" v-on:click="download()")
+        img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/deleteAll.svg" title="Delete all the grid" v-on:click="deleteAll()")
 
       #viewer
         Action#action
@@ -21,17 +23,21 @@
 
 
 <script lang="ts">
-import {Component, Vue, Watch} from "vue-property-decorator";
-import Action from "@/components/Action.vue";
-import {DataSet, Edge, IdType, Network, Node} from "vis-network/standalone";
-import {Point} from "@/utils/svg-types";
-import {namespace} from "vuex-class";
-import {EntityType} from "@/ts/grid";
-import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
-import {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
+    import {Component, Vue, Watch} from "vue-property-decorator";
+    import Action from "@/components/Action.vue";
+    import {DataSet, Edge, IdType, Network, Node, Position} from "vis-network/standalone";
+    import {Point} from "@/utils/svg-types";
+    import {namespace} from "vuex-class";
+    import {EntityType} from "@/ts/grid";
+    import {ElmtType, NullSelection, Selection} from "@/utils/selection";
+    import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
+    import {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
+    import {GridJson} from "@/types/sg-json.types";
+    import { saveAs } from 'file-saver';
 
-enum EditionMode {
+
+
+    enum EditionMode {
       NONE = "None", ADD_SUB = "substation", ADD_CABINET = "cabinet", ADD_CABLE = "cable", ADD_METER = "meter"
     }
 
@@ -54,6 +60,9 @@ enum EditionMode {
       @gridState.Mutation
       public initEmpty!: () => void;
 
+      @gridState.Getter
+      public gridJson!: string;
+
       @gridState.Mutation
       public addEntity!: (data: DataNewEntity) => void;
 
@@ -66,6 +75,9 @@ enum EditionMode {
       @gridState.Mutation
       public connectMeter2Cable!: (data: DataConnCblMeter) => void;
 
+      @gridState.Mutation
+      public initFromJson!: (json: GridJson) => void;
+
       @inspectorState.State
       public selectedElement!: Selection;
 
@@ -77,6 +89,15 @@ enum EditionMode {
 
       get  inspVisible(): boolean {
         return !this.selectedElement.equals(NullSelection);
+      }
+
+      public download() {
+        const blob = new Blob([this.gridJson], {type: "application/json;charset=utf-8"});
+        saveAs(blob, "grid.json");
+      }
+
+      public upload() {
+        //
       }
 
       public get elmtSelected(): boolean {
@@ -126,6 +147,12 @@ enum EditionMode {
 
       public setAddMeter() {
         this.editionMode = EditionMode.ADD_METER;
+      }
+
+      public deleteAll() {
+        this.nodes.clear();
+        this.reset();
+        this.initEmpty();
       }
 
       public mounted() {
@@ -203,10 +230,11 @@ enum EditionMode {
 
               if(from.id !== to.id && !(from.group === "cable" && to.group === "cable") && !(from.group === "meter" && to.group === "meter")) {
                 if((from.group === "substation" || from.group === "cabinet") && (to.group === "substation" || to.group === "cabinet")) {
+
                   const ids: IdType[] = this.nodes.add({
                     id: this.nextCableId,
-                    x: (from.x !== undefined) ? from.x + 10 : 0,
-                    y: (from.y !== undefined) ? from.y + 10 : 0,
+                    x: (from.x !== undefined && to.x !== undefined)? (from.x + to.x) / 2 : 0,
+                    y: (from.y !== undefined && to.y !== undefined)? (from.y + to.y) / 2 : 0,
                     group: "cable"
                   });
                   this.network.addEdgeMode();
@@ -239,7 +267,8 @@ enum EditionMode {
                 }
               }
             }
-          }
+          },
+          physics: false
         });
 
         // eslint-disable-next-line
@@ -253,7 +282,6 @@ enum EditionMode {
         });
 
         this.network.on("selectNode", (params) => {
-
           if(params.nodes.length == 1) {
             const id = params.nodes[0];
             const node = this.nodes.get(id) as Node;
@@ -298,12 +326,61 @@ enum EditionMode {
           }
         });
 
-        this.network.startSimulation()
 
         this.network.on("deselectNode", () => {
           this.selection = EditionMode.NONE;
           this.reset();
         });
+
+        this.network.on("dragStart", params => {
+          if(params.nodes.length == 1) {
+            const id = params.nodes[0];
+            const node = this.nodes.get(id) as Node;
+            if (node.group === "substation") {
+              this.selection = EditionMode.ADD_SUB;
+              this.select(new Selection(id, ElmtType.Entity));
+              const cables = this.network.getConnectedNodes(node.id as number) as IdType[];
+              cables.push(node.id as number);
+              this.network.selectNodes(cables, true);
+            } else if (node.group === "cabinet") {
+              this.selection = EditionMode.ADD_CABINET;
+              this.select(new Selection(id, ElmtType.Entity));
+              const cables = this.network.getConnectedNodes(node.id as number) as IdType[];
+              cables.push(node.id as number);
+              this.network.selectNodes(cables, true);
+            } else if(node.group === "cable") {
+              this.selection = EditionMode.ADD_CABLE;
+              this.select(new Selection(id, ElmtType.Cable));
+            } else if(node.group === "meter") {
+              this.selection = EditionMode.ADD_METER;
+              this.select(new Selection(id, ElmtType.Meter));
+            }
+          }
+        })
+
+
+         this.network.on("dragEnd", params => {
+             const nodeConnected = new Set<string>();
+             params.nodes.forEach((nodeIdx: number) => {
+               const node = this.nodes.get(nodeIdx) as Node;
+               if(node.group === "cable") {
+                 const neighbors = this.network.getConnectedNodes(nodeIdx) as IdType[];
+                 const ent1: Position = this.network.getPosition(neighbors[0]);
+                 const ent2: Position = this.network.getPosition(neighbors[1]);
+
+                 const str = Math.min(ent1.x, ent2.x) + "_" +
+                     Math.max(ent1.x, ent2.x) + "//" +
+                     Math.min(ent1.y, ent2.y) + "_" +
+                     Math.max(ent1.y, ent2.y);
+                 if(nodeConnected.has(str)) {
+                   this.network.moveNode(nodeIdx, ((ent1.x + ent2.x)/2) + 50, ((ent1.y + ent2.y)/2) + 50);
+                 } else {
+                   nodeConnected.add(str);
+                   this.network.moveNode(nodeIdx, (ent1.x + ent2.x)/2, (ent1.y + ent2.y)/2);
+                 }
+               }
+             });
+         });
 
 
       }
@@ -311,11 +388,6 @@ enum EditionMode {
       public created() {
         this.initEmpty();
       }
-
-      public test() {
-        this.network.selectNodes([0], true);
-      }
-
 
       public addNode(localisation: Point) {
           this.nodes.add({
