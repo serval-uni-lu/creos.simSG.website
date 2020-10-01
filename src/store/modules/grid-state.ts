@@ -56,7 +56,7 @@ export default class GridState extends VuexModule {
     public meterIdx = new Map<number, number>();
     public fuseIdx = new Map<number, number>();
     public cableIdx = new Map<number, number>();
-    public indexesUsed!: boolean;
+    public indexesUsed = false;
 
     public metersCons = new Array<number>();
     public fusesUStatusState = new Array<State>();
@@ -90,12 +90,12 @@ export default class GridState extends VuexModule {
     }
 
     get cableULoads() {
-        return (id: number): Array<ULoad>|undefined => {
+        return (id: number): Array<ULoad> => {
             const realId = (this.indexesUsed)? this.cableIdx.get(id) : id;
             if(realId !== undefined) {
                 return this.cablesULoads[realId];
             } else {
-                console.log("Silent error get fuseULoads()");
+                console.log("Silent error get cableULoads()");
                 return [];
             }
         }

@@ -30,7 +30,7 @@ function extractFuses(json: GridJson, mapFuses: Map<number, Fuse>, fuseIdx: Map<
     });
 }
 
-function extractCables(json: GridJson, mapFuses: Map<number, Fuse>, mapCables: Map<number, Cable>, meterIdx: Map<number, number>, mapMeter: Map<number, Meter>, meterCons: Array<number>) {
+function extractCables(json: GridJson, mapFuses: Map<number, Fuse>, mapCables: Map<number, Cable>, cableIdx: Map<number, number>, cableULoad: Array<Array<ULoad>>, meterIdx: Map<number, number>, mapMeter: Map<number, Meter>, meterCons: Array<number>) {
     let idxMeter = 0;
 
     json.cables.forEach((cableJson: CableJson) => {
@@ -44,6 +44,9 @@ function extractCables(json: GridJson, mapFuses: Map<number, Fuse>, mapCables: M
             meterCons.push(meterJson.consumption);
             mapMeter.set(idxMeter, meter);
         });
+
+        cableIdx.set(cableJson.id, cableULoad.length);
+        cableULoad.push([]);
 
         const cable = new Cable(cableJson.id, fuse1, fuse2);
         mapCables.set(cableJson.id, cable);
@@ -101,7 +104,7 @@ function json2Grid(json: GridJson): GridData {
     const metersCons = new Array<number>();
     const mapCables = new Map<number, Cable>();
     const mapMeter = new Map<number, Meter>();
-    extractCables(json, mapFuses, mapCables, meterIdx, mapMeter, metersCons);
+    extractCables(json, mapFuses, mapCables, cableIdx, cablesULoads, meterIdx, mapMeter, metersCons);
 
     //entities
     const mapEntities = new Map<number, Entity>();

@@ -10,6 +10,10 @@
         img.cblFuseLayer.btn.btn-secondary(:src="imageDel" :title="titleDel" class="btn btn-secondary" v-on:click="deleteElmt()" v-if="elmtSelected")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/fitGrid.svg" title="Fit the grid in the window" class="btn btn-secondary" v-on:click="fit()")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/download.svg" title="Export the grid to a JSON file" v-on:click="download()")
+        .cblFuseLayer.btn.btn-secondary
+          label(for="upload-button")
+            img(src="@/assets/buttons/upload.svg" title="Upload the grid from a JSON file")
+          input#upload-button(type="file" style="display: none;" v-on:change="upload($event)")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/deleteAll.svg" title="Delete all the grid" v-on:click="deleteAll()")
 
       #viewer
@@ -28,11 +32,11 @@
     import {DataSet, Edge, IdType, Network, Node, Position} from "vis-network/standalone";
     import {Point} from "@/utils/svg-types";
     import {namespace} from "vuex-class";
-    import {EntityType} from "@/ts/grid";
+    import {Cable, Entity, EntityType, Fuse, Grid, Meter} from "@/ts/grid";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
     import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
     import {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
-    import {GridJson} from "@/types/sg-json.types";
+    import {EntityJson, GridJson} from "@/types/sg-json.types";
     import { saveAs } from 'file-saver';
 
 
@@ -56,6 +60,9 @@
 
       public network!: Network;
       public selection: EditionMode = EditionMode.NONE;
+
+      @gridState.State
+      public grid!: Grid;
 
       @gridState.Mutation
       public initEmpty!: () => void;
@@ -96,8 +103,72 @@
         saveAs(blob, "grid.json");
       }
 
-      public upload() {
-        //
+      public upload(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.item(0);
+        if(file !== null) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const gridJson: GridJson = JSON.parse(evt.target?.result as string) as GridJson;
+              this.initFromJson(gridJson);
+
+              const fuseEntityMap: Map<number, number> = new Map<number, number>();
+              this.grid.entities?.forEach((ent: Entity) => {
+                this.nodes.add({
+                  group: ent.type.toLowerCase(),
+                  id: ent.id,
+                });
+
+                ent.fuses.forEach((fuse: Fuse) => {
+                  fuseEntityMap.set(fuse.id, ent.id);
+                })
+              });
+
+              this.grid.meters.forEach((meter: Meter) => {
+                this.nodes.add({
+                  group: "meter",
+                  id: meter.id,
+                  x: meter.latitude,
+                  y: meter.longitude
+                });
+              });
+
+              this.grid.cables.forEach((cble: Cable) => {
+                const ent1 = this.nodes.get(fuseEntityMap.get(cble.fuse1.id) as number) as Node;
+                const ent2 = this.nodes.get(fuseEntityMap.get(cble.fuse2.id) as number) as Node;
+
+
+                console.log(ent1);
+
+                const cableNodeId: IdType[] = this.nodes.add({
+                  group: "cable",
+                  id: cble.id,
+                  x: (ent1.x !== undefined && ent2.x !== undefined)? (ent1.x + ent2.x) / 2 : 0,
+                  y: (ent1.y !== undefined && ent2.y !== undefined)? (ent1.y + ent2.y) / 2 : 0,
+                });
+
+
+                this.edges.add([{
+                  from: ent1.id,
+                  to: cableNodeId[0]
+                }, {
+                  from: cableNodeId[0],
+                  to: ent2.id
+                }]);
+
+              });
+
+
+
+              this.network.stabilize()
+              this.fit();
+
+            } catch (err) {
+              console.error(err);
+            }
+          }
+          reader.readAsText(file as File);
+        }
       }
 
       public get elmtSelected(): boolean {
