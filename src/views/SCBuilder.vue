@@ -98,6 +98,15 @@
       @gridState.Mutation
       public initFromJson!: (json: GridJson) => void;
 
+      @gridState.Mutation
+      public deleteMeter!: (meterId: string) => void;
+
+      @gridState.Mutation
+      public deleteCable!: (cableId: string) => void;
+
+      @gridState.Mutation
+      public deleteEntity!: (entityId: string) => void;
+
       public get inspVisible(): boolean {
         return !this.selectedElement.equals(NullSelection);
       }
@@ -302,19 +311,20 @@
               if (from.id !== to.id && !(from.group === "cable" && to.group === "cable") && !(from.group === "meter" && to.group === "meter")) {
                 if ((from.group === "substation" || from.group === "cabinet") && (to.group === "substation" || to.group === "cabinet")) {
 
+                  const cableId = uuidv4();
                   const ids: IdType[] = this.nodes.add({
-                    id: uuidv4(),
+                    id: cableId,
                     x: (from.x !== undefined && to.x !== undefined) ? (from.x + to.x) / 2 : 0,
                     y: (from.y !== undefined && to.y !== undefined) ? (from.y + to.y) / 2 : 0,
                     group: "cable"
                   });
                   this.network.addEdgeMode();
                   this.addCable({
-                    id: uuidv4(),
+                    id: cableId,
                     entityId1: from.id as string,
                     entityId2: to.id as string
                   });
-                  // this.nextCableId--;
+
                   this.edges.add([
                     {from: from.id, to: ids[0]},
                     {from: ids[0], to: to.id}
@@ -472,7 +482,6 @@
           group: this.editionMode
         });
         if (this.editionMode === TypeNode.METER) {
-          // this.addMeter(this.nextNodeId);
           this.addMeter(id);
           this.select(new Selection(id, ElmtType.Meter));
         } else {
@@ -484,7 +493,6 @@
         this.selection = this.editionMode;
         this.editionMode = TypeNode.NONE;
 
-        // this.nextNodeId++;
       }
 
       public setAddCable() {
@@ -492,16 +500,34 @@
           this.network.addEdgeMode();
           this.editionMode = TypeNode.CABLE;
         } else {
-          console.log("Oups");
           this.network.disableEditMode();
           this.editionMode = TypeNode.NONE;
         }
       }
 
       public deleteElmt() {
+        const selectedElements = this.network.getSelectedNodes();
+        this.select(NullSelection);
+
+        if(this.selection === TypeNode.METER) {
+          this.deleteMeter(selectedElements[0] as string);
+        } else if(this.selection === TypeNode.CABINET || this.selection === TypeNode.SUB) {
+          selectedElements.forEach((id: IdType) => {
+            const node = this.nodes.get(id) as Node;
+            if(node.group === "substation" || node.group ==="cabinet") {
+              this.deleteEntity(id as string);
+            }
+          });
+        } else if(this.selection === TypeNode.CABLE) {
+          selectedElements.forEach((id: IdType) => {
+            const node = this.nodes.get(id) as Node;
+            if(node.group === "cable") {
+              this.deleteCable(id as string);
+            }
+          });
+        }
         this.network.deleteSelected();
         this.selection = TypeNode.NONE;
-        this.select(NullSelection);
       }
 
       public fit() {

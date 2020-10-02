@@ -32,7 +32,7 @@ class Grid {
 class Cable implements Named {
     fuse1: Fuse;
     fuse2: Fuse;
-    meters: Array<Meter>;
+    meters: Map<string, Meter>;
     readonly id: string;
     name: string;
 
@@ -41,9 +41,19 @@ class Cable implements Named {
         this.fuse1.cable = this;
         this.fuse2 = fuse2;
         this.fuse2.cable = this;
-        this.meters = new Array<Meter>();
+        this.meters = new Map<string, Meter>();
         this.id = id;
         this.name = name;
+    }
+
+    public addMeter(meter: Meter) {
+        this.meters.set(meter.id, meter);
+    }
+
+    public delMeter(meterId: string) {
+        const meter = this.meters.get(meterId) as Meter;
+        this.meters.delete(meterId);
+        meter.cable = undefined;
     }
 }
 
@@ -53,7 +63,7 @@ enum EntityType {
 }
 
 class Entity implements Localisable, Named {
-    fuses: Array<Fuse>;
+    private _fuses: Map<string, Fuse>;
     type: EntityType;
     latitude?: number;
     longitude?: number;
@@ -65,9 +75,28 @@ class Entity implements Localisable, Named {
         this.type = type;
         this.id = id;
         this.name = name;
-        this.fuses = fuses;
+        this._fuses = new Map<string, Fuse>();
+        fuses.forEach((fuse: Fuse) => this._fuses.set(fuse.id, fuse));
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    get fuses(): Array<Fuse> {
+        const res = new Array<Fuse>();
+        this._fuses.forEach((fuse: Fuse) => res.push(fuse));
+        return res;
+    }
+
+    public addFuse(fuse: Fuse) {
+        this._fuses.set(fuse.id, fuse);
+    }
+
+    public deleteFuse(fuseId: string) {
+        this._fuses.delete(fuseId);
+    }
+
+    public deleteAllFuses() {
+        this._fuses.clear();
     }
 }
 
@@ -76,12 +105,14 @@ class Meter implements Localisable, Named {
     longitude: number;
     name: string;
     readonly id: string;
+    cable?: Cable;
 
-    constructor(id: string, name: string = "Meter " + id, latitude = -1, longitude = -1) {
+    constructor(id: string, name: string = "Meter " + id, cable= undefined, latitude = -1, longitude = -1) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.name = name;
         this.id = id;
+        this.cable = cable;
     }
 
 }
@@ -141,43 +172,19 @@ function oppositeState(current: State): State {
     return State.CLOSED;
 }
 
-
-// class UStatus  {
-//     confidence: ConfidenceLevel;
-//     state: State;
-//
-//     constructor(state: State, confidence?: number) {
-//         const level = (confidence === undefined)? MAX_CONF_LVL : confidence;
-//         this.confidence = new ConfidenceLevel(level);
-//         this.state = state;
-//     }
-//
-//     public isClosed(): boolean {
-//         return this.state === State.CLOSED;
-//     }
-//
-//     get prettyConf(): string {
-//         return this.confidence.prettyConf();
-//     }
-//
-//
-//     public opposite(): UStatus {
-//         return new UStatus(oppositeState(this.state), this.confidence.oppositeLevel());
-//     }
-//
-// }
-
 class Fuse implements Localisable, Named{
     readonly id: string;
     latitude?: number;
     longitude?: number;
     name: string;
     private _cable!: Cable;
+    owner?: Entity;
 
 
-    constructor(id: string, name: string = "Fuse " + id) {
+    constructor(id: string, owner?: Entity, name: string = "Fuse " + id) {
         this.id = id;
         this.name = name;
+        this.owner = owner;
     }
 
     public get cable(): Cable {
