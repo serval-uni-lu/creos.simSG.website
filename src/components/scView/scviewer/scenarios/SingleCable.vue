@@ -14,8 +14,8 @@ import {Scenario} from "@/ts/scenario";
             </font-face>
         </defs>
         <g id="SC1-SingleCable" fill="none" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill-opacity="1">
-            <CableVue :id=0 :info=cbl_info :isHidden=true :isSimple=true />
-            <CableVue :id=0 :info=cbl_info :isSimple=true />
+            <CableVue :id="'0'" :info=cbl_info :isHidden=true :isSimple=true />
+            <CableVue :id="'0'" :info=cbl_info :isSimple=true />
             <g id="Substation">
                 <rect x="644" y="194.4" width="99.99999" height="47.644" fill="white"/>
                 <rect x="644" y="194.4" width="99.99999" height="47.644" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
@@ -25,15 +25,15 @@ import {Scenario} from "@/ts/scenario";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="1.4260004" y="11">Substation</tspan>
                 </text>
             </g>
-            <MeterVue :id=0 :location=meterLoc />
+            <MeterVue :id="'0'" :location=meterLoc />
             <g id="DeadEnds">
                 <circle cx="694" cy="384" r="7.00001118531325" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
             </g>
-            <FuseVue :id=0 :location=infoFuse1 />
-            <FuseVue :id=1 :location=infoFuse2 />
-            <InfoLayerCable :cableId=0 :x=cbl_info.line1.x1 :y=cbl_info.circle.y />
-            <InfoLayerFuse :id=0 :location=infoFuse1 />
-            <InfoLayerFuse :id=1 :location=infoFuse2 />
+            <FuseVue :id="'0'" :location=infoFuse1 />
+            <FuseVue :id="'1'" :location=infoFuse2 />
+            <InfoLayerCable :cableId="'0'" :x=cbl_info.line1.x1 :y=cbl_info.circle.y />
+            <InfoLayerFuse :id="'0'" :location=infoFuse1 />
+            <InfoLayerFuse :id="'1'" :location=infoFuse2 />
         </g>
     </svg>
 </template>

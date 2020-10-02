@@ -16,10 +16,10 @@ import {CableType} from "@/utils/svg-types";
             </font-face>
         </defs>
         <g fill="none" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill-opacity="1">
-            <CableVue :id=0 :info=cbl1 :isSimple=true :isHidden=true />
-            <CableVue :id=1 :info=cbl2 :isSimple=false :isHidden=true />
-            <CableVue :id=2 :info=cbl3 :isSimple=false :isHidden=true />
-            <CableVue :id=3 :info=cbl4 :isSimple=true :isHidden=true />
+            <CableVue :id="'0'" :info=cbl1 :isSimple=true :isHidden=true />
+            <CableVue :id="'1'" :info=cbl2 :isSimple=false :isHidden=true />
+            <CableVue :id="'2'" :info=cbl3 :isSimple=false :isHidden=true />
+            <CableVue :id="'3'" :info=cbl4 :isSimple=true :isHidden=true />
             <g id="Cabinet 2">
                 <rect x="876.946" y="708.5" width="71" height="32" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
                 <text transform="translate(947.8251 717.332)" fill="black">
@@ -32,10 +32,10 @@ import {CableType} from "@/utils/svg-types";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="2.0160011" y="11">Cabinet</tspan>
                 </text>
             </g>
-            <CableVue :id=0 :info=cbl1 :isSimple=true />
-            <CableVue :id=1 :info=cbl2 :isSimple=false />
-            <CableVue :id=2 :info=cbl3 :isSimple=false />
-            <CableVue :id=3 :info=cbl4 :isSimple=true />
+            <CableVue :id="'0'" :info=cbl1 :isSimple=true />
+            <CableVue :id="'1'" :info=cbl2 :isSimple=false />
+            <CableVue :id="'2'" :info=cbl3 :isSimple=false />
+            <CableVue :id="'3'" :info=cbl4 :isSimple=true />
             <g id="DE">
                 <circle cx="914.2961" cy="829.6859" r="7.00001118531319" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
             </g>
@@ -46,30 +46,30 @@ import {CableType} from "@/utils/svg-types";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="1.4260004" y="11">Substation</tspan>
                 </text>
             </g>
-            <MeterVue :id=0 :location=locMeter0 />
-            <MeterVue :id=1 :location=locMeter1 />
-            <MeterVue :id=2 :location=locMeter2 />
-            <MeterVue :id=3 :location=locMeter3 />
-            <FuseVue :id=0 :location=locFuse0 />
-            <FuseVue :id=1 :location=locFuse1 />
-            <FuseVue :id=2 :location=locFuse2 :displayLeft="'left'" />
-            <FuseVue :id=3 :location=locFuse3 :displayLeft="'left'" />
-            <FuseVue :id=4 :location=locFuse4 />
-            <FuseVue :id=5 :location=locFuse5 />
-            <FuseVue :id=6 :location=locFuse6 :displayLeft="'left'" />
-            <FuseVue :id=7 :location=locFuse7 :displayLeft="'left'" />
-            <InfoLayerCable :cableId=0 :x=cbl1.line1.x1 :y=cbl1.circle.y />
-            <InfoLayerCable :cableId=1 :x=cbl2.circle.onLineX :y=cbl2.circle.y />
-            <InfoLayerCable :cableId=2 :x=cbl3.circle.onLineX :y=cbl3.circle.y />
-            <InfoLayerCable :cableId=3 :x=cbl4.line1.x1 :y=cbl4.circle.y />
-            <InfoLayerFuse :id=0 :location=locFuse0 />
-            <InfoLayerFuse :id=1 :location=locFuse1 />
-            <InfoLayerFuse :id=2 :location=locFuse2 />
-            <InfoLayerFuse :id=3 :location=locFuse3 />
-            <InfoLayerFuse :id=4 :location=locFuse4 />
-            <InfoLayerFuse :id=5 :location=locFuse5 />
-            <InfoLayerFuse :id=6 :location=locFuse6 />
-            <InfoLayerFuse :id=7 :location=locFuse7 />
+            <MeterVue :id="'0'" :location=locMeter0 />
+            <MeterVue :id="'1'" :location=locMeter1 />
+            <MeterVue :id="'2'" :location=locMeter2 />
+            <MeterVue :id="'3'" :location=locMeter3 />
+            <FuseVue :id="'0'" :location=locFuse0 />
+            <FuseVue :id="'1'" :location=locFuse1 />
+            <FuseVue :id="'2'" :location=locFuse2 :displayLeft="'left'" />
+            <FuseVue :id="'3'" :location=locFuse3 :displayLeft="'left'" />
+            <FuseVue :id="'4'" :location=locFuse4 />
+            <FuseVue :id="'5'" :location=locFuse5 />
+            <FuseVue :id="'6'" :location=locFuse6 :displayLeft="'left'" />
+            <FuseVue :id="'7'" :location=locFuse7 :displayLeft="'left'" />
+            <InfoLayerCable :cableId="'0'" :x=cbl1.line1.x1 :y=cbl1.circle.y />
+            <InfoLayerCable :cableId="'1'" :x=cbl2.circle.onLineX :y=cbl2.circle.y />
+            <InfoLayerCable :cableId="'2'" :x=cbl3.circle.onLineX :y=cbl3.circle.y />
+            <InfoLayerCable :cableId="'3'" :x=cbl4.line1.x1 :y=cbl4.circle.y />
+            <InfoLayerFuse :id="'0'" :location=locFuse0 />
+            <InfoLayerFuse :id="'1'" :location=locFuse1 />
+            <InfoLayerFuse :id="'2'" :location=locFuse2 />
+            <InfoLayerFuse :id="'3'" :location=locFuse3 />
+            <InfoLayerFuse :id="'4'" :location=locFuse4 />
+            <InfoLayerFuse :id="'5'" :location=locFuse5 />
+            <InfoLayerFuse :id="'6'" :location=locFuse6 />
+            <InfoLayerFuse :id="'7'" :location=locFuse7 />
         </g>
     </svg>
 </template>

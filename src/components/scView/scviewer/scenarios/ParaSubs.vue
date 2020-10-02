@@ -22,9 +22,9 @@ import {CableType} from "@/utils/SvgTypes";
             </font-face>
         </defs>
         <g id="Canvas_5" fill="none" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill-opacity="1">
-            <CableVue :id=0 :info=c0_info :isSimple=false :isHidden=true />
-            <CableVue :id=1 :info=c1_info :isSimple=false :isHidden=true />
-            <CableVue :id=2 :info=c2_info :isSimple=true :isHidden=true />
+            <CableVue :id="'0'" :info=c0_info :isSimple=false :isHidden=true />
+            <CableVue :id="'1'" :info=c1_info :isSimple=false :isHidden=true />
+            <CableVue :id="'2'" :info=c2_info :isSimple=true :isHidden=true />
             <g id="Cabinet">
                 <rect x="876.8251" y="582.5197" width="71" height="32" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
                 <text transform="translate(947.8251 591.3517)" fill="black">
@@ -41,27 +41,27 @@ import {CableType} from "@/utils/SvgTypes";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="1.4260004" y="11">Substation</tspan>
                 </text>
             </g>
-            <CableVue :id=0 :info=c0_info :isSimple=false />
-            <CableVue :id=1 :info=c1_info :isSimple=false />
-            <CableVue :id=2 :info=c2_info :isSimple=true />
-            <MeterVue :id=0 :location=locMeter0 />
-            <MeterVue :id=1 :location=locMeter1 />
-            <MeterVue :id=2 :location=locMeter2 />
-            <FuseVue :id=0 :location=locFuse0 :displayLeft="'left'" />
-            <FuseVue :id=1 :location=locFuse1 :displayLeft="'left'" />
-            <FuseVue :id=2 :location=locFuse2 />
-            <FuseVue :id=3 :location=locFuse3 />
-            <FuseVue :id=4 :location=locFuse4 />
-            <FuseVue :id=5 :location=locFuse5 :displayLeft="'left'" />
-            <InfoLayerFuse :id=0 :location=locFuse0 />
-            <InfoLayerFuse :id=1 :location=locFuse1 />
-            <InfoLayerFuse :id=2 :location=locFuse2 />
-            <InfoLayerFuse :id=3 :location=locFuse3 />
-            <InfoLayerFuse :id=4 :location=locFuse4 />
-            <InfoLayerFuse :id=5 :location=locFuse5 />
-            <InfoLayerCable :cableId=0 :x=c0_info.circle.onLineX :y=c0_info.circle.y />
-            <InfoLayerCable :cableId=1 :x=c1_info.circle.onLineX :y=c1_info.circle.y />
-            <InfoLayerCable :cableId=2 :x=c2_info.line1.x1 :y=c2_info.circle.y />
+            <CableVue :id="'0'" :info=c0_info :isSimple=false />
+            <CableVue :id="'1'" :info=c1_info :isSimple=false />
+            <CableVue :id="'2'" :info=c2_info :isSimple=true />
+            <MeterVue :id="'0'" :location=locMeter0 />
+            <MeterVue :id="'1'" :location=locMeter1 />
+            <MeterVue :id="'2'" :location=locMeter2 />
+            <FuseVue :id="'0'" :location=locFuse0 :displayLeft="'left'" />
+            <FuseVue :id="'1'" :location=locFuse1 :displayLeft="'left'" />
+            <FuseVue :id="'2'" :location=locFuse2 />
+            <FuseVue :id="'3'" :location=locFuse3 />
+            <FuseVue :id="'4'" :location=locFuse4 />
+            <FuseVue :id="'5'" :location=locFuse5 :displayLeft="'left'" />
+            <InfoLayerFuse :id="'0'" :location=locFuse0 />
+            <InfoLayerFuse :id="'1'" :location=locFuse1 />
+            <InfoLayerFuse :id="'2'" :location=locFuse2 />
+            <InfoLayerFuse :id="'3'" :location=locFuse3 />
+            <InfoLayerFuse :id="'4'" :location=locFuse4 />
+            <InfoLayerFuse :id="'5'" :location=locFuse5 />
+            <InfoLayerCable :cableId="'0'" :x=c0_info.circle.onLineX :y=c0_info.circle.y />
+            <InfoLayerCable :cableId="'1'" :x=c1_info.circle.onLineX :y=c1_info.circle.y />
+            <InfoLayerCable :cableId="'2'" :x=c2_info.line1.x1 :y=c2_info.circle.y />
         </g>
     </svg>
 </template>

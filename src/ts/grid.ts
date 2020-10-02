@@ -14,14 +14,14 @@ interface Named {
 }
 
 class Grid {
-    cables: Map<number|string, Cable>;
-    fuses: Map<number, Fuse>;
-    meters: Map<number, Meter>;
-    entities?: Map<number, Entity>;
+    cables: Map<string, Cable>;
+    fuses: Map<string, Fuse>;
+    meters: Map<string, Meter>;
+    entities?: Map<string, Entity>;
 
 
-    constructor(cables: Map<number, Cable>, fuses: Map<number, Fuse>, meters: Map<number, Meter>,
-                entities?: Map<number, Entity>) {
+    constructor(cables: Map<string, Cable>, fuses: Map<string, Fuse>, meters: Map<string, Meter>,
+                entities?: Map<string, Entity>) {
         this.cables = cables;
         this.fuses = fuses;
         this.entities = entities;
@@ -29,14 +29,14 @@ class Grid {
     }
 }
 
-class Cable implements Identifiable, Named {
+class Cable implements Named {
     fuse1: Fuse;
     fuse2: Fuse;
     meters: Array<Meter>;
-    readonly id: number;
+    readonly id: string;
     name: string;
 
-    constructor(id: number, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
+    constructor(id: string, fuse1: Fuse, fuse2: Fuse, name: string = "Cable " + id) {
         this.fuse1 = fuse1;
         this.fuse1.cable = this;
         this.fuse2 = fuse2;
@@ -52,16 +52,16 @@ enum EntityType {
     CABINET = "Cabinet"
 }
 
-class Entity implements Identifiable, Localisable, Named {
+class Entity implements Localisable, Named {
     fuses: Array<Fuse>;
     type: EntityType;
     latitude?: number;
     longitude?: number;
     name: string;
-    readonly id: number;
+    readonly id: string;
 
 
-    constructor(id: number, type: EntityType, name: string, fuses: Array<Fuse>, latitude?: number, longitude?: number,) {
+    constructor(id: string, type: EntityType, name: string, fuses: Array<Fuse>, latitude?: number, longitude?: number,) {
         this.type = type;
         this.id = id;
         this.name = name;
@@ -71,13 +71,13 @@ class Entity implements Identifiable, Localisable, Named {
     }
 }
 
-class Meter implements Identifiable, Localisable, Named {
+class Meter implements Localisable, Named {
     latitude: number;
     longitude: number;
     name: string;
-    readonly id: number;
+    readonly id: string;
 
-    constructor(id: number, name: string = "Meter " + id, latitude = -1, longitude = -1) {
+    constructor(id: string, name: string = "Meter " + id, latitude = -1, longitude = -1) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.name = name;
@@ -167,15 +167,15 @@ function oppositeState(current: State): State {
 //
 // }
 
-class Fuse implements Identifiable, Localisable, Named{
-    readonly id: number;
+class Fuse implements Localisable, Named{
+    readonly id: string;
     latitude?: number;
     longitude?: number;
     name: string;
     private _cable!: Cable;
 
 
-    constructor(id: number, name: string = "Fuse " + id) {
+    constructor(id: string, name: string = "Fuse " + id) {
         this.id = id;
         this.name = name;
     }

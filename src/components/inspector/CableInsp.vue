@@ -25,7 +25,7 @@
 
     interface MeterData {
       id: number;
-      meterId: number;
+      meterId: string;
       name: string;
     }
 
@@ -39,10 +39,10 @@
         public selectedElement!: Selection;
 
         @gridState.Getter
-        public cableULoads!: (id: number) => Array<ULoad>;
+        public cableULoads!: (id: string) => Array<ULoad>;
 
         @gridState.Getter
-        public meters!: (cableId: number) => Array<Meter>;
+        public meters!: (cableId: string) => Array<Meter>;
 
 
         @gridState.State
@@ -50,7 +50,7 @@
 
 
         public getCableULoads(): Array<ULoadInfo> {
-            return uLoadsData(this.cableULoads(this.selectedElement.id as number));
+            return uLoadsData(this.cableULoads(this.selectedElement.id));
         }
 
         public getMetersData(): Array<MeterData> {
@@ -63,7 +63,7 @@
           return res;
         }
 
-        get fusesId(): Array<number> {
+        get fusesId(): Array<string> {
             const cable = this.grid.cables.get(this.selectedElement.id) as Cable;
             return [cable.fuse1.id, cable.fuse2.id]
         }

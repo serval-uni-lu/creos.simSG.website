@@ -17,21 +17,21 @@ import {Component, Prop, Vue} from "vue-property-decorator";
     @Component
     export default class MeterInsp extends Vue {
         @Prop({required: false})
-        public meterId: number | undefined;
+        public meterId: string | undefined;
 
         @inspectorState.State
         public selectedElement!: Selection;
 
         @gridState.Getter
-        public meterCons!: (id: number) => number;
+        public meterCons!: (id: string) => number;
 
         @gridState.Getter
-        public meterName!: (id: number) => string;
+        public meterName!: (id: string) => string;
 
         @gridState.Mutation
         public updateConsumption!: (data: UpdateNumVal) => void;
 
-        get id(): number {
+        get id(): string {
           return (this.meterId === undefined)? this.selectedElement.id : this.meterId;
         }
 

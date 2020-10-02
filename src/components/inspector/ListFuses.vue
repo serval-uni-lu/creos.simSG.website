@@ -28,17 +28,17 @@
         @gridState.State
         public grid!: Grid;
 
-        get fusesId(): Array<number> {
+        get fusesId(): Array<string> {
             if(this.selectedElement.type === ElmtType.Entity) {
-                const ent: Entity|undefined = this.grid.entities?.get(this.selectedElement.id as number);
+                const ent: Entity|undefined = this.grid.entities?.get(this.selectedElement.id);
                 if(ent !== undefined) {
-                    const ids = new Array<number>();
+                    const ids = new Array<string>();
                     ent.fuses.forEach((fuse: Fuse) => {
                         ids.push(fuse.id);
                     });
                     return ids;
                 }
-                return [-1];
+                return [""];
             } else {
                 const cable = this.grid.cables.get(this.selectedElement.id) as Cable;
                 return [cable.fuse1.id, cable.fuse2.id]

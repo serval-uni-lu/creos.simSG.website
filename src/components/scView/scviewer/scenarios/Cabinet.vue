@@ -17,19 +17,19 @@ import {CableType} from "@/utils/SvgTypes";
             </font-face>
         </defs>
         <g fill="none" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill-opacity="1">
-                <CableVue :id=2 :info=c2_info :isSimple=false :isHidden=true />
-                <CableVue :id=1 :info=c1_info :isSimple=false :isHidden=true />
-                <CableVue :id=0 :info=c0_info :isSimple=true :isHidden=true />
-                <CableVue :id=2 :info=c2_info :isSimple=false />
-                <CableVue :id=1 :info=c1_info :isSimple=false />
-                <CableVue :id=0 :info=c0_info :isSimple=true />
+                <CableVue :id="'2'" :info=c2_info :isSimple=false :isHidden=true />
+                <CableVue :id="'1'" :info=c1_info :isSimple=false :isHidden=true />
+                <CableVue :id="'0'" :info=c0_info :isSimple=true :isHidden=true />
+                <CableVue :id="'2'" :info=c2_info :isSimple=false />
+                <CableVue :id="'1'" :info=c1_info :isSimple=false />
+                <CableVue :id="'0'" :info=c0_info :isSimple=true />
             <g id="DE">
                 <circle cx="316.7441" cy="385" r="7.00001118531326" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white" stroke="black"/>
                 <circle cx="217.82796" cy="385" r="7.00001118531327" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
             </g>
-            <MeterVue :id=0 :location=locMeter0 />
-            <MeterVue :id=1 :location=locMeter1 />
-            <MeterVue :id=2 :location=locMeter2 />
+            <MeterVue :id="'0'" :location=locMeter0 />
+            <MeterVue :id="'1'" :location=locMeter1 />
+            <MeterVue :id="'2'" :location=locMeter2 />
             <g id="Cabinet">
                 <rect x="238.2441" y="257.4163" width="71" height="32" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
                 <text transform="translate(309.2441 266.2483)" fill="black">
@@ -44,21 +44,21 @@ import {CableType} from "@/utils/SvgTypes";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="1.4260004" y="11">Substation</tspan>
                 </text>
             </g>
-            <FuseVue :id=0 :location=locFuse0 />
-            <FuseVue :id=1 :location=locFuse1 />
-            <FuseVue :id=2 :location=locFuse2 :displayLeft="'left'" />
-            <FuseVue :id=3 :location=locFuse3 />
-            <FuseVue :id=4 :location=locFuse4 />
-            <FuseVue :id=5 :location=locFuse5 :displayLeft="'left'"/>
-            <InfoLayerFuse :id=0 :location=locFuse0 />
-            <InfoLayerFuse :id=1 :location=locFuse1 />
-            <InfoLayerFuse :id=2 :location=locFuse2 />
-            <InfoLayerFuse :id=3 :location=locFuse3 />
-            <InfoLayerFuse :id=4 :location=locFuse4 />
-            <InfoLayerFuse :id=5 :location=locFuse5 />
-            <InfoLayerCable :cableId=0 :x=c0_info.line1.x1 :y=c0_info.circle.y />
-            <InfoLayerCable :cableId=1 :x=c1_info.circle.onLineX :y=c1_info.circle.y />
-            <InfoLayerCable :cableId=2 :x=c2_info.circle.onLineX :y=c2_info.circle.y />
+            <FuseVue :id="'0'" :location=locFuse0 />
+            <FuseVue :id="'1'" :location=locFuse1 />
+            <FuseVue :id="'2'" :location=locFuse2 :displayLeft="'left'" />
+            <FuseVue :id="'3'" :location=locFuse3 />
+            <FuseVue :id="'4'" :location=locFuse4 />
+            <FuseVue :id="'5'" :location=locFuse5 :displayLeft="'left'"/>
+            <InfoLayerFuse :id="'0'" :location=locFuse0 />
+            <InfoLayerFuse :id="'1'" :location=locFuse1 />
+            <InfoLayerFuse :id="'2'" :location=locFuse2 />
+            <InfoLayerFuse :id="'3'" :location=locFuse3 />
+            <InfoLayerFuse :id="'4'" :location=locFuse4 />
+            <InfoLayerFuse :id="'5'" :location=locFuse5 />
+            <InfoLayerCable :cableId="'0'" :x=c0_info.line1.x1 :y=c0_info.circle.y />
+            <InfoLayerCable :cableId="'1'" :x=c1_info.circle.onLineX :y=c1_info.circle.y />
+            <InfoLayerCable :cableId="'2'" :x=c2_info.circle.onLineX :y=c2_info.circle.y />
         </g>
     </svg>
 </template>

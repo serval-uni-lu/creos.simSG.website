@@ -7,12 +7,12 @@ export enum ElmtType {
 }
 
 export class Selection {
-    id: number;
+    id: string;
     type: ElmtType;
     name: string;
 
 
-    constructor(id: number, type: ElmtType, name= type + " - " + id) {
+    constructor(id: string, type: ElmtType, name= type + " - " + id) {
         this.id = id;
         this.type = type;
         this.name = name;
@@ -23,4 +23,4 @@ export class Selection {
     }
 }
 
-export const NullSelection = new Selection(-1, ElmtType.NULL);
+export const NullSelection = new Selection("", ElmtType.NULL);

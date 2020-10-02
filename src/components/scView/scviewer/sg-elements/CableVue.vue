@@ -39,7 +39,7 @@ import {CableType} from "@/utils/SvgTypes";
 
     @Component
     export default class SimpleCable extends Vue{
-        @Prop() id!: number;
+        @Prop() id!: string;
         @Prop() info!: CableInfo;
         @Prop({default() {return  false}}) isHidden!: boolean;
 
@@ -50,7 +50,7 @@ import {CableType} from "@/utils/SvgTypes";
         public  selectedElement!: Selection;
 
         @gridState.Getter
-        public cableULoads!: (id: number) => Array<ULoad>;
+        public cableULoads!: (id: string) => Array<ULoad>;
 
         public selection: Selection = new Selection(this.id, ElmtType.Cable);
 

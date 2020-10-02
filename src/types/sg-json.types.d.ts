@@ -5,8 +5,8 @@ interface Grid {
 }
 
 interface Cable {
-    fuses:   number[];
-    id:      number;
+    fuses:   string[];
+    id:      string;
     meters?: Meter[];
 }
 
@@ -17,7 +17,7 @@ interface Meter {
 }
 
 interface Entity {
-    fuses:     number[];
+    fuses:     string[];
     location?: Location;
     name:      string;
     type:      Type;
@@ -29,7 +29,7 @@ interface Location {
 }
 
 interface Fuse {
-    id:     number;
+    id:     string;
     load?:  Load[];
     name:   string;
     state?: State;

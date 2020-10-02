@@ -4,38 +4,39 @@ import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, oppositeS
 import {Vue} from "vue-property-decorator";
 import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/types/sg-json.types";
 import {GridData, json2Grid} from "@/utils/grid-utils";
+import {v4 as uuidv4} from 'uuid';
 
 export interface UpdateNumVal {
-    id: number;
+    id: string;
     newValue: number;
 }
 
 export interface DataNewEntity {
-    id: number;
+    id: string;
     type: EntityType;
 }
 
 export interface DataNewCable {
-    id: number;
-    entityId1: number;
-    entityId2: number;
+    id: string;
+    entityId1: string;
+    entityId2: string;
 }
 
 export interface DataConnCblMeter {
-    meterId: number;
-    cableId: number;
+    meterId: string;
+    cableId: string;
 }
 
 
 const NULL_GRID: Grid = new Grid(
-    new Map<number, Cable>(),
-    new Map<number, Fuse>(),
-    new Map<number, Meter>()
+    new Map<string, Cable>(),
+    new Map<string, Fuse>(),
+    new Map<string, Meter>()
 );
 
 
-function _getFuseState(state: GridState, id: number): State {
-    const realId = (state.indexesUsed) ? state.fuseIdx.get(id) : id;
+function _getFuseState(state: GridState, id: string): State {
+    const realId = state.fuseIdx.get(id);
     if (realId !== undefined) {
         const status: State | undefined = state.fusesUStatusState[realId];
         return (status === undefined) ? State.CLOSED : status;
@@ -53,10 +54,9 @@ function _getFuseState(state: GridState, id: number): State {
 export default class GridState extends VuexModule {
     public grid: Grid = NULL_GRID;
 
-    public meterIdx = new Map<number, number>();
-    public fuseIdx = new Map<number, number>();
-    public cableIdx = new Map<number, number>();
-    public indexesUsed = false;
+    public meterIdx = new Map<string, number>();
+    public fuseIdx = new Map<string, number>();
+    public cableIdx = new Map<string, number>();
 
     public metersCons = new Array<number>();
     public fusesUStatusState = new Array<State>();
@@ -64,22 +64,21 @@ export default class GridState extends VuexModule {
     public fusesULoads = new Array<Array<ULoad>>();
     public cablesULoads = new Array<Array<ULoad>>();
 
-
     get fuseState() {
-        return (id: number): State => {
+        return (id: string): State => {
             return _getFuseState(this, id);
         }
     }
 
     get fuseIsClosed() {
-        return (id: number): boolean => {
+        return (id: string): boolean => {
             return _getFuseState(this, id) === State.CLOSED;
         }
     }
 
     get fuseULoads() {
-        return (id: number): Array<ULoad>|undefined => {
-            const realId = (this.indexesUsed)? this.fuseIdx.get(id) : id;
+        return (id: string): Array<ULoad>|undefined => {
+            const realId = this.fuseIdx.get(id);
             if(realId !== undefined) {
                 return this.fusesULoads[realId];
             } else {
@@ -90,8 +89,8 @@ export default class GridState extends VuexModule {
     }
 
     get cableULoads() {
-        return (id: number): Array<ULoad> => {
-            const realId = (this.indexesUsed)? this.cableIdx.get(id) : id;
+        return (id: string): Array<ULoad> => {
+            const realId = this.cableIdx.get(id);
             if(realId !== undefined) {
                 return this.cablesULoads[realId];
             } else {
@@ -102,23 +101,23 @@ export default class GridState extends VuexModule {
     }
 
     get fuseConfLevel() {
-        return (id: number): number => {
-            const realId = (this.indexesUsed)? this.fuseIdx.get(id) : id;
+        return (id: string): number => {
+            const realId = this.fuseIdx.get(id);
             if(realId !== undefined) {
-                const conf: ConfidenceLevel|undefined = this.fusesUStatusConf[id];
+                const conf: ConfidenceLevel|undefined = this.fusesUStatusConf[realId];
                 return (conf === undefined)? -1 : conf.level;
             } else {
-                console.log("Silent error fuseCOnfLevel()");
+                console.log("Silent error fuseConfLevel()");
                 return -1;
             }
         }
     }
 
     get fuseConfLevelStr() {
-        return (id: number): string => {
-            const realId = (this.indexesUsed)? this.fuseIdx.get(id) : id;
+        return (id: string): string => {
+            const realId = this.fuseIdx.get(id);
             if(realId !== undefined) {
-                const conf: ConfidenceLevel|undefined = this.fusesUStatusConf[id];
+                const conf: ConfidenceLevel|undefined = this.fusesUStatusConf[realId];
                 return (conf === undefined)? "-1" : conf.prettyConf();
             } else {
                 console.log("Silent error fuseCOnfLevel()");
@@ -128,8 +127,8 @@ export default class GridState extends VuexModule {
     }
 
     get meterCons() {
-        return (id: number): number => {
-            const realId = (this.indexesUsed)? this.meterIdx.get(id) : id;
+        return (id: string): number => {
+            const realId = this.meterIdx.get(id);
             if(realId !== undefined) {
                 const cons: number|undefined = this.metersCons[realId];
                 return (cons === undefined)? 0. : cons;
@@ -140,13 +139,13 @@ export default class GridState extends VuexModule {
     }
 
     get meterName() {
-        return (id: number): string => {
+        return (id: string): string => {
             return (this.grid.meters.get(id) as Meter).name;
         }
     }
 
     get meters() {
-        return (cableId: number): Array<Meter> => {
+        return (cableId: string): Array<Meter> => {
             return (this.grid.cables.get(cableId) as Cable).meters;
         }
     }
@@ -214,10 +213,9 @@ export default class GridState extends VuexModule {
     public initEmpty() {
         this.grid = NULL_GRID;
 
-        this.meterIdx = new Map<number, number>();
-        this.fuseIdx = new Map<number, number>();
-        this.cableIdx = new Map<number, number>();
-        this.indexesUsed = true;
+        this.meterIdx = new Map<string, number>();
+        this.fuseIdx = new Map<string, number>();
+        this.cableIdx = new Map<string, number>();
 
         this.metersCons = new Array<number>();
         this.fusesUStatusState = new Array<State>();
@@ -229,26 +227,28 @@ export default class GridState extends VuexModule {
     @Mutation
     public addEntity(data: DataNewEntity) {
         if(this.grid.entities === undefined) {
-            this.grid.entities = new Map<number, Entity>();
+            this.grid.entities = new Map<string, Entity>();
         }
         this.grid.entities.set(data.id, new Entity(data.id, data.type, data.type + " " + data.id, new Array<Fuse>()));
     }
 
     @Mutation
     public addCable(data: DataNewCable) {
-        let fuseId = this.fusesUStatusConf.length;
+        let fuseId = uuidv4();
         const fuse1 = new Fuse(fuseId);
         this.grid.fuses.set(fuseId, fuse1);
+        this.fuseIdx.set(fuseId, this.fusesUStatusConf.length);
         this.fusesUStatusConf.push(new ConfidenceLevel());
         this.fusesUStatusState.push(State.CLOSED);
-        this.fuseIdx.set(fuseId, fuseId);
 
-        fuseId = this.fusesUStatusConf.length;
+
+        fuseId = uuidv4();
         const fuse2 = new Fuse(fuseId);
         this.grid.fuses.set(fuseId, fuse2);
+        this.fuseIdx.set(fuseId, this.fusesUStatusConf.length);
         this.fusesUStatusConf.push(new ConfidenceLevel());
         this.fusesUStatusState.push(State.CLOSED);
-        this.fuseIdx.set(fuseId, fuseId);
+
 
         this.grid.cables.set(data.id, new Cable(data.id, fuse1, fuse2, "Cable"));
         this.cableIdx.set(data.id, this.cablesULoads.length);
@@ -259,12 +259,10 @@ export default class GridState extends VuexModule {
 
         entity1.fuses.push(fuse1);
         entity2.fuses.push(fuse2);
-
-        console.log(this.grid.fuses);
     }
 
     @Mutation
-    public addMeter(id: number) {
+    public addMeter(id: string) {
         const meter = new Meter(id);
         this.grid.meters.set(id, meter);
         this.meterIdx.set(id, this.metersCons.length);
@@ -288,32 +286,58 @@ export default class GridState extends VuexModule {
 
         const nbFuses = getScNbFuses(scenario);
 
-        const fuses = new Map<number, Fuse>();
-        const cables = new Map<number, Cable>();
-        const meters = new Map<number, Meter>();
+        const fuses = new Map<string, Fuse>();
+        const cables = new Map<string, Cable>();
+        const meters = new Map<string, Meter>();
 
         for (let i=0; i<nbFuses; i++) {
-            fuses.set(i, new Fuse(i));
+            const id = i + "";
+            fuses.set(id, new Fuse(id));
+            this.fuseIdx.set(id, this.fusesUStatusState.length);
             this.fusesUStatusState.push(State.CLOSED);
             this.fusesUStatusConf.push(new ConfidenceLevel());
+            this.fusesULoads.push([]);
         }
 
-        for (let i = 0; i < (nbFuses / 2); i++) {
-            const fuse1 = fuses.get(i*2) as Fuse;
-            const fuse2 = fuses.get(i*2 + 1) as Fuse;
-            const cable= new Cable(i, fuse1, fuse2);
-            cables.set(i, cable);
+        const itFuses = fuses.entries();
+        let fuse1 = itFuses.next();
+        let fuse2 = itFuses.next();
+        let cableIdx = 0;
+        while (!fuse1.done) {
+            const id = cableIdx + "";
+            const cable = new Cable(uuidv4(), fuse1.value[1], fuse2.value[1]);
+            cables.set(id, cable);
+            this.cableIdx.set(id, this.cablesULoads.length);
+            this.cablesULoads.push([]);
 
-            const meter = new Meter(i);
-            meters.set(i, meter);
+            const meterId = id;
+            const meter = new Meter(meterId);
+            meters.set(meterId, meter);
             cable.meters.push(meter);
+            this.meterIdx.set(meterId, this.metersCons.length);
 
             this.metersCons.push(0.);
+
+            fuse1 = itFuses.next();
+            fuse2 = itFuses.next();
+            cableIdx++;
         }
+
+        // for (let i = 0; i < (nbFuses / 2); i++) {
+        //     const fuse1 = fuses.get(i*2) as Fuse;
+        //     const fuse2 = fuses.get(i*2 + 1) as Fuse;
+        //     const cable= new Cable(i, fuse1, fuse2);
+        //     cables.set(i, cable);
+        //
+        //     const meter = new Meter(i);
+        //     meters.set(i, meter);
+        //     cable.meters.push(meter);
+        //
+        //     this.metersCons.push(0.);
+        // }
 
 
         this.grid = new Grid(cables, fuses, meters);
-        this.indexesUsed = false;
     }
 
     @Mutation
@@ -325,7 +349,6 @@ export default class GridState extends VuexModule {
         this.meterIdx = data.meterIdx;
         this.fuseIdx = data.fuseIdx;
         this.cableIdx = data.cableIdx;
-        this.indexesUsed = true;
 
         this.metersCons = data.metersCons;
         this.fusesUStatusState = data.fusesStates;
@@ -336,7 +359,7 @@ export default class GridState extends VuexModule {
 
     @Mutation
     public updateConsumption(data: UpdateNumVal) {
-        const id = (this.indexesUsed)? this.meterIdx.get(data.id): data.id;
+        const id = this.meterIdx.get(data.id);
         if(id !== undefined) {
             Vue.set(this.metersCons, id, data.newValue);
         } else {
@@ -346,7 +369,7 @@ export default class GridState extends VuexModule {
 
     @Mutation
     public updateStateConf(data: UpdateNumVal) {
-        const id = (this.indexesUsed)? this.fuseIdx.get(data.id): data.id;
+        const id = this.fuseIdx.get(data.id);
         if(id !== undefined) {
             Vue.set(this.fusesUStatusConf, data.id, new ConfidenceLevel(data.newValue));
         } else {
@@ -355,9 +378,9 @@ export default class GridState extends VuexModule {
     }
 
     @Mutation
-    public switchFuse(id: number) {
+    public switchFuse(id: string) {
         const currState = _getFuseState(this, id);
-        const realId = (this.indexesUsed)? this.fuseIdx.get(id): id;
+        const realId = this.fuseIdx.get(id);
         if(realId !== undefined) {
             Vue.set(this.fusesUStatusState, realId, oppositeState(currState));
         } else {

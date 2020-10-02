@@ -47,7 +47,7 @@ import {ElmtType} from "@/utils/selection";
         public initFromJson!: (json: GridJson) => void;
 
         @gridState.Getter
-        public cableULoads!: (id: number) => Array<ULoad>|undefined;
+        public cableULoads!: (id: string) => Array<ULoad>|undefined;
 
         public showCableLayer = false;
         public cableLayer = new Array<CableMarker>();
@@ -72,7 +72,7 @@ import {ElmtType} from "@/utils/selection";
             }
         }
 
-        public cableUloadStr(cableId: number): string {
+        public cableUloadStr(cableId: string): string {
             const data = uLoadsData(this.cableULoads(cableId));
             let str = "";
             for(const d of data) {
@@ -81,7 +81,7 @@ import {ElmtType} from "@/utils/selection";
             return str;
         }
 
-        private createCableLayer(cableId: number): L.DivIcon {
+        private createCableLayer(cableId: string): L.DivIcon {
             return new L.DivIcon({
                 html:  "<div class='cableInfo'>" +
                     "    <h4>Cable " + cableId + "</h4>" +
@@ -133,12 +133,12 @@ import {ElmtType} from "@/utils/selection";
             this.hover = undefined;
         }
 
-        private drawCable(paraC: Array<Cable>, cableDone: Set<number>, map: L.Map) {
+        private drawCable(paraC: Array<Cable>, cableDone: Set<string>, map: L.Map) {
             // Here the algo. does not keep same distance between cables
             // but the result is sufficient enough for the demo
             paraC.forEach((cable: Cable, idx: number) => {
-                if(!cableDone.has(cable.id as number)) {
-                    cableDone.add(cable.id as number);
+                if(!cableDone.has(cable.id)) {
+                    cableDone.add(cable.id);
 
                     let geoLine: LatLngLiteral[];
                     if(paraC.length == 1) {
@@ -192,14 +192,14 @@ import {ElmtType} from "@/utils/selection";
                         lat: (geoLine[0].lat + geoLine[1].lat) / 2,
                         lng: (geoLine[0].lng + geoLine[1].lng) / 2
                     };
-                    const infoA = new CableMarker(pos, cable.id as number, {draggable: true});
+                    const infoA = new CableMarker(pos, cable.id, {draggable: true});
                     this.cableLayer.push(infoA);
 
                 }
             })
         }
 
-        private drawEntity(entity: Entity, cableDone: Set<number>, map: L.Map) {
+        private drawEntity(entity: Entity, cableDone: Set<string>, map: L.Map) {
             if(entity.latitude !== undefined && entity.longitude !== undefined) {
                 const marker = new EntityMarker([entity.latitude, entity.longitude], entity);
                 setDefaultStyle(marker);
@@ -238,7 +238,7 @@ import {ElmtType} from "@/utils/selection";
             });
             tileLayer.addTo(this.map);
 
-            const cableDone = new Set<number>();
+            const cableDone = new Set<string>();
             this.grid.entities?.forEach((entity: Entity) => {
                 this.drawEntity(entity, cableDone, this.map)
             });

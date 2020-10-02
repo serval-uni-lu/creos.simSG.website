@@ -20,14 +20,14 @@
 
     @Component
     export default class MeterVue extends Vue {
-        @Prop() id!: number;
+        @Prop() id!: string;
         @Prop() location!: Point;
 
         @inspState.State
         public selectedElement!: Selection;
 
         @gridState.Getter
-        public meterCons!: (meterId: number) => number;
+        public meterCons!: (meterId: string) => number;
 
 
 

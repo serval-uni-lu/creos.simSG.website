@@ -3,7 +3,7 @@
         <title>Status: {{status}}; Load: {{uLoads()}}</title>
         <rect :x=location.x :y=location.y width="10" height="10" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         <text :transform="translate">
-            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" x="0" y="11">Fuse {{id + 1}}</tspan>
+            <tspan font-family="Helvetica Neue" font-size="12" font-weight="400" x="0" y="11">Fuse {{id}}</tspan>
         </text>
     </g>
 </template>
@@ -21,7 +21,7 @@
 
     @Component
     export default class FuseVue extends Vue {
-        @Prop() id!: number;
+        @Prop() id!: string;
         @Prop() location!: Point;
 
         @Prop({
@@ -36,18 +36,18 @@
         @Prop({default:0}) shiftTextY!: number;
 
         @gridState.Getter
-        public fuseIsClosed!: (id: number) => boolean;
+        public fuseIsClosed!: (id: string) => boolean;
 
         @gridState.Getter
-        public fuseState!: (id: number) => State;
+        public fuseState!: (id: string) => State;
 
         public selection: Selection = new Selection(this.id, ElmtType.Fuse)
 
         @gridState.Mutation
-        public switchFuse!: (id: number) => void;
+        public switchFuse!: (id: string) => void;
 
         @gridState.Getter
-        public fuseULoads!: (id: number) => Array<ULoad>;
+        public fuseULoads!: (id: string) => Array<ULoad>;
 
         @inspState.Mutation
         public select!: (elmt: Selection) => void;

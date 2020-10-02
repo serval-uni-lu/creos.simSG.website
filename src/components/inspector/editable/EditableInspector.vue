@@ -39,8 +39,8 @@ const gridState = namespace('GridState')
 
     public get name(): string {
       if(this.isEntity) {
-        return ((this.grid.entities as Map<number, Entity>)
-          .get(this.selectedElement.id as number) as Entity).name
+        return ((this.grid.entities as Map<string, Entity>)
+          .get(this.selectedElement.id) as Entity).name
       } else if (this.isCable) {
         return (this.grid.cables.get(this.selectedElement.id) as Cable).name
       } else if(this.isMeter) {
@@ -54,8 +54,8 @@ const gridState = namespace('GridState')
     public setName(event: InputEvent) {
       const newName = (event.target as HTMLElement).innerText;
       if(this.isEntity) {
-        ((this.grid.entities as Map<number, Entity>)
-            .get(this.selectedElement.id as number) as Entity).name = newName;
+        ((this.grid.entities as Map<string, Entity>)
+            .get(this.selectedElement.id) as Entity).name = newName;
       } else if(this.isCable) {
         (this.grid.cables.get(this.selectedElement.id) as Cable).name = newName;
       } else if(this.isMeter) {

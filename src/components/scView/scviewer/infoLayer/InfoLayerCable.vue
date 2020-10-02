@@ -2,7 +2,7 @@
     <g :transform=transform :visibility=visibility class="infoBox">
         <rect x="0" y="0" rx="8" ry="8" :width="width" :height="height" fill="white"  stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         <text transform="translate(5 5)">
-            <tspan font-family="Helvetica Neue" font-size="8" font-weight="700" x="26" :y=getYText(0)>Cable {{cableId + 1}}</tspan>
+            <tspan font-family="Helvetica Neue" font-size="8" font-weight="700" x="26" :y=getYText(0)>Cable {{cableId}}</tspan>
             <tspan v-for="ul in uLoads()" :key="ul.id" font-family="Helvetica Neue" font-size="8" font-weight="400" x="0" :y="ul.y">- {{ul.value}} A [{{ul.confidence}}%]</tspan>
         </text>
     </g>
@@ -21,7 +21,7 @@
 
     @Component
     export default class InfoCableLayer extends Vue {
-        @Prop() cableId!: number;
+        @Prop() cableId!: string;
         @Prop() x!: number;
         @Prop() y!: number;
 
@@ -32,7 +32,7 @@
         public cableLayerVisible!: boolean;
 
         @gridState.Getter
-        public cableULoads!: (id: number) => Array<ULoad>|undefined;
+        public cableULoads!: (id: string) => Array<ULoad>|undefined;
 
 
         get visibility(): string {

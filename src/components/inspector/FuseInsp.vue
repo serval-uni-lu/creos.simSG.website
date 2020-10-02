@@ -34,7 +34,7 @@
     @Component
     export default class FuseInsp extends Vue{
         @gridState.Mutation
-        public switchFuse!: (id: number) => void;
+        public switchFuse!: (id: string) => void;
 
         @gridState.Mutation
         public updateStateConf!: (data: UpdateNumVal) => void;
@@ -43,22 +43,22 @@
         public selectedElement!: Selection;
 
         @gridState.Getter
-        public fuseState!: (id: number) => State;
+        public fuseState!: (id: string) => State;
 
         @gridState.Getter
-        public fuseIsClosed!: (id: number) => boolean;
+        public fuseIsClosed!: (id: string) => boolean;
 
         @gridState.Getter
-        public fuseULoads!: (id: number) => Array<ULoad>;
+        public fuseULoads!: (id: string) => Array<ULoad>;
 
         @gridState.Getter
-        public fuseConfLevel!: (id: number) => number;
+        public fuseConfLevel!: (id: string) => number;
 
         @Prop({required: false})
-        public fuseId: number | undefined;
+        public fuseId: string | undefined;
 
-        get id(): number {
-            return (this.fuseId !== undefined)? this.fuseId : this.selectedElement.id as number;
+        get id(): string {
+            return (this.fuseId !== undefined)? this.fuseId : this.selectedElement.id;
         }
 
         get isClosed() {

@@ -2,7 +2,7 @@
     <g :transform=transform :visibility=visibility class="infoBox">
         <rect x="0" y="0" rx="8" ry="8" :width=width :height="height" fill="white"  stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         <text transform="translate(5 5)">
-            <tspan font-family="Helvetica Neue" font-size="8" font-weight="700" x="26" :y=getYText(0)>Fuse {{id + 1}}</tspan>
+            <tspan font-family="Helvetica Neue" font-size="8" font-weight="700" x="26" :y=getYText(0)>Fuse {{id}}</tspan>
             <tspan font-family="Helvetica Neue" font-size="8" font-weight="400" x="0" :y=getYText(1)>Status: {{status}} [{{confLevel}}%]</tspan>
             <tspan font-family="Helvetica Neue" font-size="8" font-weight="400" x="0" :y=getYText(2)>Load:</tspan>
             <tspan v-for="ul in uLoads()" :key="ul.id" font-family="Helvetica Neue" font-size="8" font-weight="400" x="0" :y="ul.y">- {{ul.value}} A [{{ul.confidence}}%]</tspan>
@@ -24,7 +24,7 @@
 
     @Component
     export default class InfoLayerFuse extends Vue{
-        @Prop() id!: number;
+        @Prop() id!: string;
         @Prop() location!: Point;
 
         public readonly  width = 100;
@@ -34,13 +34,13 @@
         public fuseLayerVisible!: boolean;
 
         @gridState.Getter
-        public fuseULoads!: (id: number) => Array<ULoad>|undefined;
+        public fuseULoads!: (id: string) => Array<ULoad>|undefined;
 
         @gridState.Getter
-        public fuseState!: (id: number) => State;
+        public fuseState!: (id: string) => State;
 
         @gridState.Getter
-        public fuseConfLevelStr!: (id: number) => string;
+        public fuseConfLevelStr!: (id: string) => string;
 
 
         get visibility(): string {

@@ -16,16 +16,16 @@ import {CableType} from "@/utils/SvgTypes";
             </font-face>
         </defs>
         <g fill="none" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill-opacity="1">
-            <CableVue :id=4 :info=cbl5 :isHidden=true />
-            <CableVue :id=3 :info=cbl4 :isHidden=true />
-            <CableVue :id=2 :info=cbl3 :isHidden=true />
-            <CableVue :id=1 :info=cbl2 :isHidden=true />
-            <CableVue :id=0 :info=cbl1 :isHidden=true />
-            <MeterVue :id=0 :location=locMeter0 />
-            <MeterVue :id=1 :location=locMeter1 />
-            <MeterVue :id=2 :location=locMeter2 />
-            <MeterVue :id=3 :location=locMeter3 />
-            <MeterVue :id=4 :location=locMeter4 />
+            <CableVue :id="'4'" :info=cbl5 :isHidden=true />
+            <CableVue :id="'3'" :info=cbl4 :isHidden=true />
+            <CableVue :id="'2'" :info=cbl3 :isHidden=true />
+            <CableVue :id="'1'" :info=cbl2 :isHidden=true />
+            <CableVue :id="'0'" :info=cbl1 :isHidden=true />
+            <MeterVue :id="'0'" :location=locMeter0 />
+            <MeterVue :id="'1'" :location=locMeter1 />
+            <MeterVue :id="'2'" :location=locMeter2 />
+            <MeterVue :id="'3'" :location=locMeter3 />
+            <MeterVue :id="'4'" :location=locMeter4 />
             <g id="Substation">
                 <rect x="204.5" y="8" width="99.99999" height="47.644" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
                 <path d="M 204.5 55.644 L 304.5 8 L 204.5 8 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="black"/>
@@ -45,40 +45,40 @@ import {CableType} from "@/utils/SvgTypes";
                     <tspan font-family="Helvetica Neue" font-size="12" font-style="italic" font-weight="400" fill="black" x="2.0160011" y="11">Cabinet</tspan>
                 </text>
             </g>
-            <CableVue :id=4 :info=cbl5 />
-            <CableVue :id=3 :info=cbl4 />
-            <CableVue :id=2 :info=cbl3 />
-            <CableVue :id=1 :info=cbl2 />
-            <CableVue :id=0 :info=cbl1 />
+            <CableVue :id="'4'" :info=cbl5 />
+            <CableVue :id="'3'" :info=cbl4 />
+            <CableVue :id="'2'" :info=cbl3 />
+            <CableVue :id="'1'" :info=cbl2 />
+            <CableVue :id="'0'" :info=cbl1 />
             <g id="DE">
                 <circle cx="253.5" cy="363.62933" r="7.1770752434485" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
                 <circle cx="520.9223" cy="176.39287" r="7.17707524344844"  stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" fill="white"/>
             </g>
-            <FuseVue :id=9 :location=locFuse9 />
-            <FuseVue :id=8 :location=locFuse8 />
-            <FuseVue :id=7 :location=locFuse7 />
-            <FuseVue :id=6 :location=locFuse6 :displayLeft="'bottom'" />
-            <FuseVue :id=5 :location=locFuse5 :displayLeft="'top'" />
-            <FuseVue :id=4 :location=locFuse4 :displayLeft="'top'" />
-            <FuseVue :id=3 :location=locFuse3 :displayLeft="'top'" />
-            <FuseVue :id=2 :location=locFuse2 />
-            <FuseVue :id=1 :location=locFuse1 :displayLeft="'left'" />
-            <FuseVue :id=0 :location=locFuse0 :displayLeft="'left'" />
-            <InfoLayerFuse :id=9 :location=locFuse9 />
-            <InfoLayerFuse :id=8 :location=locFuse8 />
-            <InfoLayerFuse :id=7 :location=locFuse7 />
-            <InfoLayerFuse :id=6 :location=locFuse6 />
-            <InfoLayerFuse :id=5 :location=locFuse5 />
-            <InfoLayerFuse :id=4 :location=locFuse4 />
-            <InfoLayerFuse :id=3 :location=locFuse3 />
-            <InfoLayerFuse :id=2 :location=locFuse2 />
-            <InfoLayerFuse :id=1 :location=locFuse1 />
-            <InfoLayerFuse :id=0 :location=locFuse0 />
-            <InfoLayerCable :cableId=4 :x=cbl5.line1.x1 :y=cbl5.circle.y />
-            <InfoLayerCable :cableId=3 :x=cbl4.circle.onLineX :y=cbl4.circle.y />
-            <InfoLayerCable :cableId=1 :x=cbl2.circle.onLineX :y=cbl2.circle.y />
-            <InfoLayerCable :cableId=0 :x=cbl1.circle.onLineX :y=cbl1.circle.y />
-            <InfoLayerCable :cableId=2 :x=cbl3.circleX :y=cbl3.line.y />
+            <FuseVue :id="'9'" :location=locFuse9 />
+            <FuseVue :id="'8'" :location=locFuse8 />
+            <FuseVue :id="'7'" :location=locFuse7 />
+            <FuseVue :id="'6'" :location=locFuse6 :displayLeft="'bottom'" />
+            <FuseVue :id="'5'" :location=locFuse5 :displayLeft="'top'" />
+            <FuseVue :id="'4'" :location=locFuse4 :displayLeft="'top'" />
+            <FuseVue :id="'3'" :location=locFuse3 :displayLeft="'top'" />
+            <FuseVue :id="'2'" :location=locFuse2 />
+            <FuseVue :id="'1'" :location=locFuse1 :displayLeft="'left'" />
+            <FuseVue :id="'0'" :location=locFuse0 :displayLeft="'left'" />
+            <InfoLayerFuse :id="'9'" :location=locFuse9 />
+            <InfoLayerFuse :id="'8'" :location=locFuse8 />
+            <InfoLayerFuse :id="'7'" :location=locFuse7 />
+            <InfoLayerFuse :id="'6'" :location=locFuse6 />
+            <InfoLayerFuse :id="'5'" :location=locFuse5 />
+            <InfoLayerFuse :id="'4'" :location=locFuse4 />
+            <InfoLayerFuse :id="'3'" :location=locFuse3 />
+            <InfoLayerFuse :id="'2'" :location=locFuse2 />
+            <InfoLayerFuse :id="'1'" :location=locFuse1 />
+            <InfoLayerFuse :id="'0'" :location=locFuse0 />
+            <InfoLayerCable :cableId="'4'" :x=cbl5.line1.x1 :y=cbl5.circle.y />
+            <InfoLayerCable :cableId="'3'" :x=cbl4.circle.onLineX :y=cbl4.circle.y />
+            <InfoLayerCable :cableId="'1'" :x=cbl2.circle.onLineX :y=cbl2.circle.y />
+            <InfoLayerCable :cableId="'0'" :x=cbl1.circle.onLineX :y=cbl1.circle.y />
+            <InfoLayerCable :cableId="'2'" :x=cbl3.circleX :y=cbl3.line.y />
         </g>
     </svg>
 </template>
