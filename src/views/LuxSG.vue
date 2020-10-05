@@ -73,13 +73,8 @@ const inspectorState = namespace('InspectorState');
         public showOrHideCableLayer() {
             this.showCableLayer = !this.showCableLayer;
             if(!this.showCableLayer) {
-                // this.cableLayer.forEach((cbl: L.Marker) => cbl.remove())
               this.cableLayer.remove();
             } else {
-                // this.cableLayer.forEach((cbl: CableMarker) => {
-                //     cbl.setIcon(this.createCableLayer(cbl.cableId))
-                //     cbl.addTo(this.map)
-                // })
               this.cableLayer.addTo(this.map);
             }
         }
@@ -102,22 +97,9 @@ const inspectorState = namespace('InspectorState');
             return str;
         }
 
-        private createCableLayer(cableId: string): L.DivIcon {
-            return new L.DivIcon({
-                html:  "<div class='cableInfo'>" +
-                    "    <h4>Cable " + cableId + "</h4>" +
-                    "    <ul>" +
-                        this.cableUloadStr(cableId) +
-                    "    </ul>" +
-                    "</div>",
-                className: ""
-            });
-        }
-
         public created() {
             this.initFromJson(json as GridJson);
         }
-
 
         @Watch("selectedElement")
         public inspClosed() {
