@@ -13,21 +13,27 @@ import {ElmtType} from "@/utils/selection";
 </template>
 
 <script lang="ts">
-    import {Component, Vue, Watch} from "vue-property-decorator";
-    import Action from "@/components/Action.vue";
-    import Inspector from "@/components/inspector/Inspector.vue";
-    import {namespace} from "vuex-class";
-    import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-    import L, {LatLngExpression, LatLngLiteral} from "leaflet";
-    import {Cable, Entity, Grid, ULoad} from "@/ts/grid";
-    import {GridJson} from "@/types/sg-json.types";
-    import json from "@/assets/grids/real-case.json";
-    import {extractParaCables, setDefaultStyle, setHoverStyle, setSelectedStyle} from "@/utils/sg-icon-utils";
-    import {CableLine, CableMarker, EntityMarker} from "@/types/sg-markers-types";
-    import ToolBar from "@/components/scView/scviewer/ToolBar.vue";
-    import {uLoadsData} from "@/utils/uLoadsUtils";
+import {Component, Vue, Watch} from "vue-property-decorator";
+import Action from "@/components/Action.vue";
+import Inspector from "@/components/inspector/Inspector.vue";
+import {namespace} from "vuex-class";
+import {ElmtType, NullSelection, Selection} from "@/utils/selection";
+import L, {LatLngExpression, LatLngLiteral} from "leaflet";
+import {Cable, Entity, Grid, Meter, ULoad} from "@/ts/grid";
+import {GridJson} from "@/types/sg-json.types";
+import json from "@/assets/grids/real-case.json";
+import {
+  extractParaCables,
+  meterCableStyle,
+  setDefaultStyle,
+  setHoverStyle,
+  setSelectedStyle
+} from "@/utils/sg-icon-utils";
+import {CableLine, CableMarker, EntityMarker, MeterMarker} from "@/types/sg-markers-types";
+import ToolBar from "@/components/scView/scviewer/ToolBar.vue";
+import {uLoadsData} from "@/utils/uLoadsUtils";
 
-    const inspectorState = namespace('InspectorState');
+const inspectorState = namespace('InspectorState');
     const gridState = namespace("GridState");
 
     @Component({
@@ -57,8 +63,8 @@ import {ElmtType} from "@/utils/selection";
             return !this.selectedElement.equals(NullSelection);
         }
 
-        private selection: EntityMarker | CableLine | undefined;
-        private hover: EntityMarker | CableLine | undefined;
+        private selection: EntityMarker | CableLine | MeterMarker | undefined;
+        private hover: EntityMarker | CableLine | MeterMarker | undefined;
 
         public showOrHideCableLayer() {
             this.showCableLayer = !this.showCableLayer;
@@ -108,7 +114,7 @@ import {ElmtType} from "@/utils/selection";
             }
         }
 
-        private selectMarker(newSelect: CableLine | EntityMarker) {
+        private selectMarker(newSelect: CableLine | EntityMarker | MeterMarker) {
             if(this.selection !== undefined) {
                 setDefaultStyle(this.selection);
             }
@@ -116,7 +122,7 @@ import {ElmtType} from "@/utils/selection";
             setSelectedStyle(this.selection);
         }
 
-        private startHover(newMarker: EntityMarker | CableLine) {
+        private startHover(newMarker: EntityMarker | CableLine | MeterMarker) {
             if(this.selection === undefined || newMarker !== this.selection) {
                 if(this.hover !== undefined) {
                     setDefaultStyle(this.hover);
@@ -147,7 +153,6 @@ import {ElmtType} from "@/utils/selection";
                             {lat: cable.fuse2.latitude as number, lng: cable.fuse2.longitude as number},
                         ];
                     } else {
-
                         let offset: number;
                         if (idx % 2 === 0) {
                             offset = (idx / 2 + 1);
@@ -194,6 +199,27 @@ import {ElmtType} from "@/utils/selection";
                     };
                     const infoA = new CableMarker(pos, cable.id, {draggable: true});
                     this.cableLayer.push(infoA);
+
+                    cable.meters.forEach((meter: Meter) => {
+                      const markerPos: LatLngExpression = {lat: meter.latitude, lng: meter.longitude};
+                      const marker = new MeterMarker(markerPos, meter);
+                      setDefaultStyle(marker);
+                      marker.addTo(map);
+
+                      marker.on("mouseover", (event: L.LeafletMouseEvent) => this.startHover(event.target as MeterMarker));
+                      marker.on("mouseout", () => this.quitHover());
+                      marker.bindTooltip(meter.name);
+                      marker.on("click", (event: L.LeafletMouseEvent) => {
+                        const marker = event.target as MeterMarker;
+                        this.selectMarker(marker);
+                        this.select(new Selection(marker.meter.id, ElmtType.Meter, marker.meter.name))
+                      });
+
+                      const cableConn = new L.Polyline([pos, markerPos]);
+                      cableConn.addTo(map);
+                      cableConn.setStyle(meterCableStyle);
+
+                    });
 
                 }
             })

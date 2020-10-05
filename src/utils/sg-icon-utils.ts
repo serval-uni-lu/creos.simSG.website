@@ -1,5 +1,5 @@
 import L, {PathOptions} from "leaflet";
-import {CableLine, EntityMarker} from "@/types/sg-markers-types";
+import {CableLine, EntityMarker, MeterMarker} from "@/types/sg-markers-types";
 import {Cable, Entity, EntityType, Fuse} from "@/ts/grid";
 
 const logoSize = 35;
@@ -34,6 +34,21 @@ const iconCabinetSelected = L.icon({
     iconSize: [logoSizeSelected, logoSizeSelected]
 });
 
+const iconMeter = L.icon({
+    iconUrl: require("@/assets/logos/grids/meter.svg"),
+    iconSize: [logoSize / 2, logoSize / 2]
+});
+
+const iconMeterHover = L.icon({
+    iconUrl: require("@/assets/logos/grids/meter.svg"),
+    iconSize: [logoSizeSelected / 2, logoSizeSelected / 2]
+});
+
+const iconMeterSelected = L.icon({
+    iconUrl: require("@/assets/logos/grids/meter-selected.svg"),
+    iconSize: [logoSizeSelected / 2, logoSizeSelected / 2]
+})
+
 const cableStyle: PathOptions = {
     color: "black",
     weight: 3
@@ -49,30 +64,42 @@ const cableSelectedStyle: PathOptions = {
     weight: 5
 };
 
-function setDefaultStyle(elmt: CableLine | EntityMarker) {
+const meterCableStyle: PathOptions = {
+    color: "black",
+    weight: 1,
+    dashArray: "4"
+}
+
+function setDefaultStyle(elmt: CableLine | EntityMarker | MeterMarker) {
     if(elmt instanceof CableLine) {
         elmt.setStyle(cableStyle);
-    } else {
+    } else if(elmt instanceof EntityMarker) {
         const newIcon = (elmt.entity.type === EntityType.SUBSTATION) ? iconSubs : iconCabinet;
         elmt.setIcon(newIcon);
+    } else {
+        elmt.setIcon(iconMeter);
     }
 }
 
-function setHoverStyle(elmt: CableLine | EntityMarker) {
+function setHoverStyle(elmt: CableLine | EntityMarker | MeterMarker) {
     if(elmt instanceof CableLine) {
         elmt.setStyle(cableHoverStyle);
-    } else {
+    } else if(elmt instanceof EntityMarker) {
         const newIcon = (elmt.entity.type === EntityType.SUBSTATION) ? iconSubsHover : iconCabinetHover;
         elmt.setIcon(newIcon);
+    } else {
+        elmt.setIcon(iconMeterHover);
     }
 }
 
-function setSelectedStyle(elmt: CableLine | EntityMarker) {
+function setSelectedStyle(elmt: CableLine | EntityMarker | MeterMarker) {
     if(elmt instanceof CableLine) {
         elmt.setStyle(cableSelectedStyle);
-    } else {
+    } else if(elmt instanceof EntityMarker) {
         const newIcon = (elmt.entity.type === EntityType.SUBSTATION) ? iconSubsSelected : iconCabinetSelected;
         elmt.setIcon(newIcon);
+    } else {
+        elmt.setIcon(iconMeterSelected)
     }
 }
 
@@ -93,4 +120,4 @@ function extractParaCables(entity: Entity): Map<number, Array<Cable>> {
     return paraCables;
 }
 
-export {setDefaultStyle, setSelectedStyle, setHoverStyle, extractParaCables}
+export {setDefaultStyle, setSelectedStyle, setHoverStyle, extractParaCables, meterCableStyle}

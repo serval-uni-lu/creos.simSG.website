@@ -36,19 +36,21 @@ function extractCables(json: GridJson, mapFuses: Map<string, Fuse>, mapCables: M
         const fuse1 = mapFuses.get(cableJson.fuses[0]) as Fuse;
         const fuse2 = mapFuses.get(cableJson.fuses[1]) as Fuse;
 
+        cableIdx.set(cableJson.id, cableULoad.length);
+        cableULoad.push({load: [], cableId: cableJson.id});
+
+        const cable = new Cable(cableJson.id, fuse1, fuse2);
+        cable.meters = new Map<string, Meter>();
+        mapCables.set(cableJson.id, cable);
+
         cableJson.meters?.forEach((meterJson: MeterJson) => {
             const idxMeter = uuidv4();
             const meter = new Meter(idxMeter, meterJson.name, undefined, meterJson.location?.lat, meterJson.location?.long);
             meterIdx.set(idxMeter, meterCons.length);
             meterCons.push({cons: meterJson.consumption, meterId: idxMeter});
             mapMeter.set(idxMeter, meter);
+            cable.meters.set(idxMeter, meter);
         });
-
-        cableIdx.set(cableJson.id, cableULoad.length);
-        cableULoad.push({load: [], cableId: cableJson.id});
-
-        const cable = new Cable(cableJson.id, fuse1, fuse2);
-        mapCables.set(cableJson.id, cable);
     });
 }
 

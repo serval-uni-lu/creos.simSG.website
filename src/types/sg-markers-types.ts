@@ -1,5 +1,5 @@
 import L, {LatLngExpression, PolylineOptions} from "leaflet";
-import {Cable, Entity} from "@/ts/grid";
+import {Cable, Entity, Meter} from "@/ts/grid";
 
 export class EntityMarker extends L.Marker {
     entity: Entity;
@@ -26,5 +26,14 @@ export class CableMarker extends L.Marker {
     constructor(latLng: L.LatLngExpression, cableId: string, options?: L.MarkerOptions) {
         super(latLng, options);
         this.cableId = cableId;
+    }
+}
+
+export class MeterMarker extends L.Marker {
+    meter: Meter
+
+    constructor(latLng: L.LatLngExpression, meter: Meter, options?: L.MarkerOptions) {
+        super(latLng, options);
+        this.meter = meter;
     }
 }
