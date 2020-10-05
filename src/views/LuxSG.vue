@@ -4,7 +4,8 @@ import {ElmtType} from "@/utils/selection";
         h2 Real-case scenario: Reckange disctrict (Mersch, Luxembourg)
 
         .toolbar
-            img.cblFuseLayer(src="@/assets/buttons/infoLayerCable.svg" title="Add a layer with cables information" class="btn btn-secondary" v-bind:class="{active: showCableLayer}" v-on:click="showOrHideCableLayer()")
+            img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/infoLayerCable.svg" title="Add a layer with cables information" v-bind:class="{active: showCableLayer}" v-on:click="showOrHideCableLayer()")
+            img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/meterLayer.svg" title="Show/hide meters" v-bind:class="{active: showMeterLayer}" v-on:click="showOrHideMeterLayer()")
 
         #viewer
             Action#action
@@ -56,7 +57,10 @@ const inspectorState = namespace('InspectorState');
         public cableULoads!: (id: string) => Array<ULoad>|undefined;
 
         public showCableLayer = false;
-        public cableLayer = new Array<CableMarker>();
+        public showMeterLayer = true;
+        // public cableLayer = new Array<CableMarker>();
+        public cableLayer = new L.LayerGroup();
+        public meterLayer = new L.LayerGroup();
         private map!: L.Map;
 
         get inspVisible(): boolean {
@@ -69,13 +73,24 @@ const inspectorState = namespace('InspectorState');
         public showOrHideCableLayer() {
             this.showCableLayer = !this.showCableLayer;
             if(!this.showCableLayer) {
-                this.cableLayer.forEach((cbl: L.Marker) => cbl.remove())
+                // this.cableLayer.forEach((cbl: L.Marker) => cbl.remove())
+              this.cableLayer.remove();
             } else {
-                this.cableLayer.forEach((cbl: CableMarker) => {
-                    cbl.setIcon(this.createCableLayer(cbl.cableId))
-                    cbl.addTo(this.map)
-                })
+                // this.cableLayer.forEach((cbl: CableMarker) => {
+                //     cbl.setIcon(this.createCableLayer(cbl.cableId))
+                //     cbl.addTo(this.map)
+                // })
+              this.cableLayer.addTo(this.map);
             }
+        }
+
+        public showOrHideMeterLayer() {
+          this.showMeterLayer = !this.showMeterLayer;
+          if(!this.showMeterLayer) {
+            this.meterLayer.remove();
+          } else {
+            this.map.addLayer(this.meterLayer);
+          }
         }
 
         public cableUloadStr(cableId: string): string {
@@ -197,14 +212,23 @@ const inspectorState = namespace('InspectorState');
                         lat: (geoLine[0].lat + geoLine[1].lat) / 2,
                         lng: (geoLine[0].lng + geoLine[1].lng) / 2
                     };
-                    const infoA = new CableMarker(pos, cable.id, {draggable: true});
-                    this.cableLayer.push(infoA);
+                    const infoCable = new CableMarker(pos, cable.id, {draggable: true});
+                    infoCable.setIcon(new L.DivIcon({
+                      html:  "<div class='cableInfo'>" +
+                          "    <h4>Cable " + cable.id + "</h4>" +
+                          "    <ul>" +
+                          this.cableUloadStr(cable.id) +
+                          "    </ul>" +
+                          "</div>",
+                      className: ""
+                    }));
+                    this.cableLayer.addLayer(infoCable);
 
                     cable.meters.forEach((meter: Meter) => {
                       const markerPos: LatLngExpression = {lat: meter.latitude, lng: meter.longitude};
                       const marker = new MeterMarker(markerPos, meter);
                       setDefaultStyle(marker);
-                      marker.addTo(map);
+                      marker.addTo(this.meterLayer);
 
                       marker.on("mouseover", (event: L.LeafletMouseEvent) => this.startHover(event.target as MeterMarker));
                       marker.on("mouseout", () => this.quitHover());
@@ -216,10 +240,10 @@ const inspectorState = namespace('InspectorState');
                       });
 
                       const cableConn = new L.Polyline([pos, markerPos]);
-                      cableConn.addTo(map);
+                      cableConn.addTo(this.meterLayer);
                       cableConn.setStyle(meterCableStyle);
-
                     });
+                    this.meterLayer.addTo(map);
 
                 }
             })
