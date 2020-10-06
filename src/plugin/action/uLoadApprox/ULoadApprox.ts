@@ -6,7 +6,11 @@ export default new (class ULoadApprox {
     private readonly compoName = "ULoadApproxVue";
 
     public install() {
-        Vue.prototype.$actionCmp.push({id: Vue.prototype.$actionCmp.length, name: this.compoName});
+        Vue.prototype.$actionCmp.push({
+            id: Vue.prototype.$actionCmp.length,
+            name: this.compoName,
+            activated: false
+        });
         Vue.component(this.compoName, ULoadApproxVue)
     }
 })

@@ -78,7 +78,7 @@
       public grid!: Grid;
 
       @gridState.Getter
-      public gridJson!: string;
+      public gridJsonStr!: string;
 
       @gridState.Mutation
       public initEmpty!: () => void;
@@ -149,7 +149,7 @@
       }
 
       public download() {
-        const blob = new Blob([this.gridJson], {type: "application/json;charset=utf-8"});
+        const blob = new Blob([this.gridJsonStr], {type: "application/json;charset=utf-8"});
         saveAs(blob, "grid.json");
       }
 

@@ -3,7 +3,7 @@
         h2 Actions
         select(v-model="currentAct")
             option(selected disabled :value="nullValue") {{nullValue.name}}
-            option(v-for="ac in $actionCmp", :key="ac.id", :value="ac") {{ac.name}}
+            option(v-for="ac in actions", :key="ac.id", :value="ac") {{ac.name}}
 
         div(v-if="selectionDone")
             component(v-bind:is="currentAct.name")
@@ -16,12 +16,15 @@
 
     @Component
     export default class Action extends Vue{
-
         public currentAct: ActionData = NULL_ACTION;
         readonly nullValue: ActionData = NULL_ACTION;
 
         get selectionDone(): boolean {
             return actionDataIsNotNull(this.currentAct);
+        }
+
+        get actions(): Array<ActionData> {
+          return this.$actionCmp.filter((action: ActionData) => action.activated)
         }
 
     }

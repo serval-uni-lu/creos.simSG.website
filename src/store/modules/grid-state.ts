@@ -1,10 +1,17 @@
 import {Module, Mutation, VuexModule} from "vuex-module-decorators";
-import {getScNbFuses, Scenario} from "@/ts/scenario";
+import {Scenario} from "@/ts/scenario";
 import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
 import {Vue} from "vue-property-decorator";
 import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/types/sg-json.types";
 import {GridData, json2Grid} from "@/utils/grid-utils";
 import {v4 as uuidv4} from 'uuid';
+import {
+    createCabinetSc,
+    createIndirectPara,
+    createParaCab,
+    createParaSubs,
+    createSingleCableSc
+} from "@/utils/scenario-utils";
 
 export interface UpdateNumVal {
     id: string;
@@ -31,7 +38,8 @@ export interface DataConnCblMeter {
 const NULL_GRID: Grid = new Grid(
     new Map<string, Cable>(),
     new Map<string, Fuse>(),
-    new Map<string, Meter>()
+    new Map<string, Meter>(),
+    new Map<string, Entity>()
 );
 
 
@@ -42,6 +50,20 @@ function _getFuseState(state: GridState, id: string): State {
         return (status === undefined) ? State.CLOSED : status;
     }
     return State.CLOSED;
+}
+
+function _initFields(state: GridState, data: GridData) {
+    state.grid = data.staticInfo;
+
+    state.meterIdx = data.meterIdx;
+    state.fuseIdx = data.fuseIdx;
+    state.cableIdx = data.cableIdx;
+
+    state.metersCons = data.metersCons;
+    state.fusesUStatusState = data.fusesStates;
+    state.fusesUStatusConf = data.fusesConf;
+    state.fusesULoads = data.fusesULoads;
+    state.cablesULoads = data.cablesULoads;
 }
 
 function _deleteCable(state: GridState, cableId: string) {
@@ -168,7 +190,11 @@ export default class GridState extends VuexModule {
         }
     }
 
-    get gridJson() {
+    get gridJsonStr(): string {
+        return JSON.stringify(this.gridJson, undefined, 2)
+    }
+
+    get gridJson(): GridJson {
         const entities: EntityJson[] = new Array<EntityJson>();
         this.grid.entities?.forEach((entity: Entity) => {
             const jsonEnt: EntityJson = {
@@ -224,7 +250,7 @@ export default class GridState extends VuexModule {
             cables.push(cableJson);
         });
 
-        return JSON.stringify({entities, fuses, cables}, undefined, 2)
+        return {entities, fuses, cables};
     }
 
     @Mutation
@@ -298,69 +324,19 @@ export default class GridState extends VuexModule {
 
     @Mutation
     public initFromScenario(scenario: Scenario) {
-        this.metersCons = new Array<{cons: number; meterId: string }>();
-        this.fusesUStatusState = new Array<{state: State; fuseId: string}>();
-        this.fusesUStatusConf = new Array<{conf: ConfidenceLevel; fuseId: string}>();
-        this.fusesULoads = new Array<{load: Array<ULoad>; fuseId: string}>();
-        this.cablesULoads = new Array<{load: Array<ULoad>; cableId: string}>();
-
-        const nbFuses = getScNbFuses(scenario);
-
-        const fuses = new Map<string, Fuse>();
-        const cables = new Map<string, Cable>();
-        const meters = new Map<string, Meter>();
-
-        for (let i=0; i<nbFuses; i++) {
-            const id = i + "";
-            fuses.set(id, new Fuse(id));
-            this.fuseIdx.set(id, this.fusesUStatusState.length);
-            this.fusesUStatusState.push({state: State.CLOSED, fuseId: id});
-            this.fusesUStatusConf.push({conf: new ConfidenceLevel(), fuseId: id});
-            this.fusesULoads.push({load: [], fuseId: id});
+        switch (scenario) {
+            case Scenario.SINGLE_CABLE: _initFields(this, createSingleCableSc()); break;
+            case Scenario.CABINET: _initFields(this, createCabinetSc()); break;
+            case Scenario.PARA_SUBS: _initFields(this, createParaSubs()); break;
+            case Scenario.PARA_CABINET: _initFields(this, createParaCab()); break;
+            case Scenario.INDIRECT_PARA: _initFields(this, createIndirectPara()); break;
+            default: console.error("Silent error: scenario not yet implemented: " + scenario); break
         }
-
-        const itFuses = fuses.entries();
-        let fuse1 = itFuses.next();
-        let fuse2 = itFuses.next();
-        let cableIdx = 0;
-        while (!fuse1.done) {
-            const id = cableIdx + "";
-            const cable = new Cable(uuidv4(), fuse1.value[1], fuse2.value[1]);
-            cables.set(id, cable);
-            this.cableIdx.set(id, this.cablesULoads.length);
-            this.cablesULoads.push({load: [], cableId: id});
-
-            const meterId = id;
-            const meter = new Meter(meterId);
-            meters.set(meterId, meter);
-            cable.meters.set(meterId, meter);
-            this.meterIdx.set(meterId, this.metersCons.length);
-
-            this.metersCons.push({cons: 0., meterId});
-
-            fuse1 = itFuses.next();
-            fuse2 = itFuses.next();
-            cableIdx++;
-        }
-
-        this.grid = new Grid(cables, fuses, meters);
     }
 
     @Mutation
     public initFromJson(json: GridJson) {
-        const data: GridData = json2Grid(json);
-
-        this.grid = data.staticInfo;
-
-        this.meterIdx = data.meterIdx;
-        this.fuseIdx = data.fuseIdx;
-        this.cableIdx = data.cableIdx;
-
-        this.metersCons = data.metersCons;
-        this.fusesUStatusState = data.fusesStates;
-        this.fusesUStatusConf = data.fusesConf;
-        this.fusesULoads = data.fusesULoads;
-        this.cablesULoads = data.cablesULoads;
+        _initFields(this, json2Grid(json));
     }
 
     @Mutation

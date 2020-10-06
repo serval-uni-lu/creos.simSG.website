@@ -5,7 +5,7 @@ import store from './store'
 import {ActionData} from "@/utils/actionUtils";
 import LoadApprox from "@/plugin/action/loadApprox/LoadApprox";
 import ULoadApprox from "@/plugin/action/uLoadApprox/ULoadApprox";
-
+import * as WS from "./ws";
 
 Vue.config.productionTip = false;
 
@@ -19,5 +19,7 @@ new Vue({
   store,
   render: h => h(App)
 });
+
+WS.connect();
 
 

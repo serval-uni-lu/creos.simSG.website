@@ -17,11 +17,11 @@ class Grid {
     cables: Map<string, Cable>;
     fuses: Map<string, Fuse>;
     meters: Map<string, Meter>;
-    entities?: Map<string, Entity>;
+    entities: Map<string, Entity>;
 
 
     constructor(cables: Map<string, Cable>, fuses: Map<string, Fuse>, meters: Map<string, Meter>,
-                entities?: Map<string, Entity>) {
+                entities: Map<string, Entity>) {
         this.cables = cables;
         this.fuses = fuses;
         this.entities = entities;
@@ -107,12 +107,13 @@ class Meter implements Localisable, Named {
     readonly id: string;
     cable?: Cable;
 
-    constructor(id: string, name: string = "Meter " + id, cable= undefined, latitude = -1, longitude = -1) {
+    constructor(id: string, name: string = "Meter " + id, cable: Cable|undefined= undefined, latitude = -1, longitude = -1) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.name = name;
         this.id = id;
         this.cable = cable;
+        this.cable?.addMeter(this);
     }
 
 }
