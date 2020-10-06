@@ -1,9 +1,10 @@
-import {Message, ActionListMsg} from "@/types/ws-message";
+import {Message, ActionListMsg, LoadApproximationAnswer} from "@/types/ws-message";
 import Vue from 'vue'
 import {ActionData} from "@/utils/actionUtils";
 
 const WS_URL = 'ws://localhost:8585/ws';
 let ws: WebSocket | undefined;
+let application: Vue | undefined;
 
 function onclose() {
     console.debug("Connection closed.");
@@ -14,13 +15,10 @@ function onopen() {
 }
 
 function onmessage(event: MessageEvent) {
-    console.debug("Message received.");
+    console.debug("Message received: " + event.data);
 
-    
-    let message = JSON.parse(event.data) as Message
+    const message = JSON.parse(event.data) as Message
     if(message.type === "ActionList") {
-        message = message as ActionListMsg;
-
         const setActions = new Set<string>();
         (message as ActionListMsg).actionName.forEach((name: string) => setActions.add(name));
         Vue.prototype.$actionCmp.forEach((action: ActionData, idx: number) => {
@@ -28,11 +26,16 @@ function onmessage(event: MessageEvent) {
                 Vue.set(Vue.prototype.$actionCmp, idx, {...action, activated: true})
             }
         });
+    } else if(message.type === "LoadApproximationAnswer") {
+        application?.$store.commit("GridState/setFusesLoad", (message as LoadApproximationAnswer).fuseLoads);
+        application?.$store.commit("GridState/setCablesLoad", (message as LoadApproximationAnswer).cableLoads);
+    } else {
+        console.error("Message type not supported: " + message.type);
     }
 
 }
 
-export function connect() {
+export function connect(app: Vue) {
     console.debug("Connection attempt to " + WS_URL);
     if(ws !== undefined) {
         ws.close(4000, "Server not connected");
@@ -43,6 +46,8 @@ export function connect() {
     ws.onopen = onopen;
     ws.onclose = onclose;
     ws.onmessage = onmessage;
+
+    application = app;
 }
 
 export function sendMessage(message: Message) {

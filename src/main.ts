@@ -13,13 +13,13 @@ Vue.prototype.$actionCmp = Array<ActionData>();
 Vue.use(LoadApprox);
 Vue.use(ULoadApprox);
 
-new Vue({
+const app = new Vue({
   el: '#app',
   router,
   store,
   render: h => h(App)
 });
 
-WS.connect();
+WS.connect(app);
 
 

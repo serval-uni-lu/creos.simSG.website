@@ -12,6 +12,7 @@ import {
     createParaSubs,
     createSingleCableSc
 } from "@/utils/scenario-utils";
+import {Load} from "@/types/ws-message";
 
 export interface UpdateNumVal {
     id: string;
@@ -404,6 +405,26 @@ export default class GridState extends VuexModule {
             entity.deleteAllFuses();
             this.grid.entities?.delete(entityId);
         }
+    }
+
+    @Mutation
+    public setCablesLoad(loads: Array<Load>) {
+        loads.forEach((value: Load) => {
+            const id = this.cableIdx.get(value.id);
+            if(id !== undefined) {
+                Vue.set(this.cablesULoads, id, {cableId: value.id, load: [new ULoad(value.value)]})
+            }
+        });
+    }
+
+    @Mutation
+    public setFusesLoad(loads: Array<Load>) {
+        loads.forEach((value: Load) => {
+            const id = this.fuseIdx.get(value.id);
+            if(id !== undefined) {
+                Vue.set(this.fusesULoads, id, {cableId: value.id, load: [new ULoad(value.value)]})
+            }
+        });
     }
 }
 
