@@ -16,6 +16,7 @@ function onopen() {
 function onmessage(event: MessageEvent) {
     console.debug("Message received.");
 
+    
     let message = JSON.parse(event.data) as Message
     if(message.type === "ActionList") {
         message = message as ActionListMsg;
