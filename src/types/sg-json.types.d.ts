@@ -11,12 +11,14 @@ interface Cable {
 }
 
 interface Meter {
+    id: string;
     consumption: number;
     name:        string;
     location?: Location;
 }
 
 interface Entity {
+    id: string,
     fuses:     string[];
     location?: Location;
     name:      string;

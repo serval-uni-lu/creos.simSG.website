@@ -36,12 +36,15 @@ export interface DataConnCblMeter {
 }
 
 
-const NULL_GRID: Grid = new Grid(
-    new Map<string, Cable>(),
-    new Map<string, Fuse>(),
-    new Map<string, Meter>(),
-    new Map<string, Entity>()
-);
+function _getEmptyGrid(): Grid {
+    return new Grid(
+        new Map<string, Cable>(),
+        new Map<string, Fuse>(),
+        new Map<string, Meter>(),
+        new Map<string, Entity>()
+    );
+}
+
 
 
 function _getFuseState(state: GridState, id: string): State {
@@ -91,7 +94,7 @@ function _deleteCable(state: GridState, cableId: string) {
     namespaced: true
 })
 export default class GridState extends VuexModule {
-    public grid: Grid = NULL_GRID;
+    public grid: Grid = _getEmptyGrid();
 
     public meterIdx = new Map<string, number>();
     public fuseIdx = new Map<string, number>();
@@ -111,7 +114,7 @@ export default class GridState extends VuexModule {
 
     get fuseIsClosed() {
         return (id: string): boolean => {
-            return _getFuseState(this, id) === State.CLOSED;
+            return this.fuseState(id) === State.CLOSED;
         }
     }
 
@@ -151,7 +154,6 @@ export default class GridState extends VuexModule {
             }
         }
     }
-
     get fuseConfLevelStr() {
         return (id: string): string => {
             const realId = this.fuseIdx.get(id);
@@ -164,6 +166,7 @@ export default class GridState extends VuexModule {
             }
         }
     }
+
 
     get meterCons() {
         return (id: string): number => {
@@ -191,72 +194,9 @@ export default class GridState extends VuexModule {
         }
     }
 
-    get gridJsonStr(): string {
-        return JSON.stringify(this.gridJson, undefined, 2)
-    }
-
-    get gridJson(): GridJson {
-        const entities: EntityJson[] = new Array<EntityJson>();
-        this.grid.entities?.forEach((entity: Entity) => {
-            const jsonEnt: EntityJson = {
-                name: entity.name,
-                type: entity.type,
-                fuses: entity.fuses.map((fuse: Fuse) => fuse.id)
-            };
-            if(entity.latitude !== undefined && entity.longitude !== undefined) {
-                jsonEnt.location = {lat: entity.latitude, long: entity.longitude}
-            }
-            entities.push(jsonEnt);
-        });
-
-        const fuses: FuseJson[] = new Array<FuseJson>();
-        this.grid.fuses.forEach((fuse: Fuse) => {
-            const jsonFuse: FuseJson = {
-                id: fuse.id,
-                name: fuse.name,
-                state: {status: this.fuseState(fuse.id), confidence: this.fuseConfLevel(fuse.id)},
-            };
-            const load = this.fuseULoads(fuse.id);
-            if(load != undefined) {
-                jsonFuse.load = new Array<LoadJson>();
-                load.forEach((ul: ULoad) => {
-                    jsonFuse.load?.push({
-                        confidence: ul.confidence.level,
-                        value: ul.load
-                    })
-                })
-            }
-            fuses.push(jsonFuse);
-        });
-
-        const cables: CableJson[] = new Array<CableJson>();
-        this.grid.cables.forEach((cable: Cable) => {
-            const cableJson: CableJson = {
-                id: cable.id,
-                fuses: [cable.fuse1.id, cable.fuse2.id]
-            };
-
-            cableJson.meters = this.meters(cableJson.id).map((meter: Meter) => {
-                const json: MeterJson = {
-                    name: meter.name,
-                    consumption: this.meterCons(meter.id)
-                };
-
-                if(meter.latitude !== -1 && meter.longitude !== -1) {
-                    json.location = {lat: meter.latitude, long: meter.longitude};
-                }
-
-                return json;
-            });
-            cables.push(cableJson);
-        });
-
-        return {entities, fuses, cables};
-    }
-
     @Mutation
     public initEmpty() {
-        this.grid = NULL_GRID;
+        this.grid = _getEmptyGrid();
 
         this.meterIdx = new Map<string, number>();
         this.fuseIdx = new Map<string, number>();
@@ -395,7 +335,6 @@ export default class GridState extends VuexModule {
 
     @Mutation
     public deleteEntity(entityId: string) {
-        console.log("ici");
         const entity = this.grid.entities?.get(entityId);
         if(entity !== undefined) {
             entity.fuses.forEach((fuse: Fuse) => {

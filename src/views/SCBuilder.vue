@@ -32,13 +32,15 @@
     import {DataSet, Edge, IdType, Network, Node, Position} from "vis-network/standalone";
     import {Point} from "@/utils/svg-types";
     import {namespace} from "vuex-class";
-    import {Cable, Entity, EntityType, Fuse, Grid, Meter} from "@/ts/grid";
+    import {Cable, Entity, EntityType, Fuse, Grid, Meter, State} from "@/ts/grid";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
     import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
-    import {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
-    import {GridJson} from "@/types/sg-json.types";
+    import GridState, {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
+    import {CableJson, EntityJson, GridJson, MeterJson} from "@/types/sg-json.types";
     import {saveAs} from 'file-saver';
     import {v4 as uuidv4} from 'uuid';
+    import {Mutation} from "vuex";
+    import toJson from "@/utils/grid-state-utils";
 
     enum TypeNode {
       NONE = "None", SUB = "substation", CABINET = "cabinet", CABLE = "cable", METER = "meter"
@@ -53,8 +55,6 @@
     export default class SCBuilder extends Vue {
       public nodes: DataSet<Node> = new DataSet<Node>();
       public edges: DataSet<Edge> = new DataSet<Edge>();
-      // public nextNodeId = 0;
-      // public nextCableId = -1;
       public editionMode: TypeNode = TypeNode.NONE;
       public selection: TypeNode = TypeNode.NONE;
       public network!: Network;
@@ -77,8 +77,11 @@
       @gridState.State
       public grid!: Grid;
 
+      @gridState.State
+      public jsonVersion!: GridJson | undefined;
+
       @gridState.Getter
-      public gridJsonStr!: string;
+      public gridJson!: GridJson;
 
       @gridState.Mutation
       public initEmpty!: () => void;
@@ -88,6 +91,9 @@
 
       @gridState.Mutation
       public addCable!: (data: DataNewCable) => void;
+
+      @gridState.Mutation
+      public updateGridJson!: () => GridJson;
 
       @gridState.Mutation
       public addMeter!: (id: string) => void;
@@ -149,7 +155,24 @@
       }
 
       public download() {
-        const blob = new Blob([this.gridJsonStr], {type: "application/json;charset=utf-8"});
+        // this.updateGridJson();
+        // const json = this.jsonVersion as GridJson;
+        // const json = this.gridJson;
+        const json = toJson((this.$store as any)._modulesNamespaceMap["GridState/"].state as GridState)
+        json.entities.forEach((ent: EntityJson) => {
+           const nodePos: Position = this.network.getPosition(ent.id)
+           ent.location = {lat: nodePos.x as number, long: nodePos.y as number}
+        });
+
+        json.cables.forEach((cable: CableJson) => {
+          cable.meters?.forEach((meter: MeterJson) => {
+            const nodePos: Position = this.network.getPosition(meter.id)
+            meter.location = {lat: nodePos.x as number, long: nodePos.y as number}
+          })
+        });
+
+        const jsonStr = JSON.stringify(json, undefined, 2);
+        const blob = new Blob([jsonStr], {type: "application/json;charset=utf-8"});
         saveAs(blob, "grid.json");
       }
 
@@ -167,6 +190,8 @@
                 this.nodes.add({
                   group: ent.type.toLowerCase(),
                   id: ent.id,
+                  x: ent.latitude,
+                  y: ent.longitude
                 });
 
                 ent.fuses.forEach((fuse: Fuse) => {
@@ -202,6 +227,14 @@
                   from: cableNodeId[0],
                   to: ent2.id
                 }]);
+
+               cble.meters.forEach((meter: Meter) => {
+                 this.edges.add([{
+                   from: cableNodeId[0],
+                   to: this.nodes.get(meter.id)?.id,
+                   dashes: true
+                 }])
+               });
 
               });
 
