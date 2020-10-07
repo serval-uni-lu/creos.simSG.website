@@ -1,4 +1,4 @@
-import {Message, ActionListMsg, LoadApproximationAnswer} from "@/types/ws-message";
+import {Message, ActionListMsg, LoadApproximationAnswer, ULoadApproximationAnswer} from "@/types/ws-message";
 import Vue from 'vue'
 import {ActionData} from "@/utils/actionUtils";
 
@@ -22,13 +22,16 @@ function onmessage(event: MessageEvent) {
         const setActions = new Set<string>();
         (message as ActionListMsg).actionName.forEach((name: string) => setActions.add(name));
         Vue.prototype.$actionCmp.forEach((action: ActionData, idx: number) => {
-            if(setActions.has(action.name)) {
-                Vue.set(Vue.prototype.$actionCmp, idx, {...action, activated: true})
+            if(setActions.has(action.name) && application != undefined) {
+                Vue.set(application.$actionCmp, idx, {...action, activated: true});
             }
         });
     } else if(message.type === "LoadApproximationAnswer") {
         application?.$store.commit("GridState/setFusesLoad", (message as LoadApproximationAnswer).fuseLoads);
         application?.$store.commit("GridState/setCablesLoad", (message as LoadApproximationAnswer).cableLoads);
+    } else if (message.type == "ULoadApproximationAnswer") {
+        application?.$store.commit("GridState/setFusesULoad", (message as ULoadApproximationAnswer).fuseLoads);
+        application?.$store.commit("GridState/setCablesULoad", (message as ULoadApproximationAnswer).cableLoads);
     } else {
         console.error("Message type not supported: " + message.type);
     }

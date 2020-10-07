@@ -12,7 +12,7 @@ import {
     createParaSubs,
     createSingleCableSc
 } from "@/utils/scenario-utils";
-import {Load} from "@/types/ws-message";
+import {LoadMsg, ULoadJson, ULoadMsg} from "@/types/ws-message";
 
 export interface UpdateNumVal {
     id: string;
@@ -408,8 +408,8 @@ export default class GridState extends VuexModule {
     }
 
     @Mutation
-    public setCablesLoad(loads: Array<Load>) {
-        loads.forEach((value: Load) => {
+    public setCablesLoad(loads: Array<LoadMsg>) {
+        loads.forEach((value: LoadMsg) => {
             const id = this.cableIdx.get(value.id);
             if(id !== undefined) {
                 Vue.set(this.cablesULoads, id, {cableId: value.id, load: [new ULoad(value.value)]})
@@ -418,11 +418,41 @@ export default class GridState extends VuexModule {
     }
 
     @Mutation
-    public setFusesLoad(loads: Array<Load>) {
-        loads.forEach((value: Load) => {
+    public setFusesLoad(loads: Array<LoadMsg>) {
+        loads.forEach((value: LoadMsg) => {
             const id = this.fuseIdx.get(value.id);
             if(id !== undefined) {
                 Vue.set(this.fusesULoads, id, {cableId: value.id, load: [new ULoad(value.value)]})
+            }
+        });
+    }
+
+    @Mutation
+    public setCablesULoad(loads: Array<ULoadMsg>) {
+        loads.forEach((value: ULoadMsg) => {
+            const id = this.cableIdx.get(value.id);
+            if(id !== undefined) {
+                const cableUloads = new Array<ULoad>();
+                value.uloads.forEach((ul: ULoadJson) => {
+                    cableUloads.push(new ULoad(ul.value, ul.confidence))
+                });
+                console.log(cableUloads);
+                Vue.set(this.cablesULoads, id, {cableId: value.id, load: cableUloads})
+            }
+        });
+    }
+
+    @Mutation
+    public setFusesULoad(loads: Array<ULoadMsg>) {
+        loads.forEach((value: ULoadMsg) => {
+            const id = this.fuseIdx.get(value.id);
+            if(id !== undefined) {
+                const fuseULoads = new Array<ULoad>();
+                value.uloads.forEach((ul: ULoadJson) => {
+                    fuseULoads.push(new ULoad(ul.value, ul.confidence))
+                });
+                console.log(fuseULoads);
+                Vue.set(this.fusesULoads, id, {cableId: value.id, load: fuseULoads})
             }
         });
     }
