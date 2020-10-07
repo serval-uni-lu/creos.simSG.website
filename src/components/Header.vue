@@ -3,7 +3,7 @@
         h1 SimSG: Smart Grid Simulator
 
         #logos
-            img.creos(src="@/assets/logos/creos.jpg" alt="logo creos")
+            img.creos(src="@/assets/logos/creos.png" alt="logo creos")
             img.serval(src="@/assets/logos/serval.svg" alt="logo serval")
 
 </template>
@@ -16,7 +16,7 @@
 </script>
 
 <style lang="scss" scoped>
-    $logo-height: 90px;
+    $logo-height: 100%;
     $position: right;
 
     #page-header {
@@ -33,11 +33,11 @@
 
     #logos {
         position: absolute;
-        top: 0;
+        top: 10px;
         right: 10px;
         float: $position;
-        background-color: white;
-        border-radius: 0 0 8px 8px;
+        z-index: 2100;
+        height: 100px;
 
         .creos {
             padding-right: 10px;
