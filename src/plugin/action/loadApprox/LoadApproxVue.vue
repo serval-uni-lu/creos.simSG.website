@@ -6,21 +6,15 @@
     import {Vue, Component} from "vue-property-decorator";
     import * as WS from "@/ws/index"
     import {LoadApproxMsg} from "@/plugin/action/loadApprox/load-approx-msg";
-    import {namespace} from "vuex-class";
-    import {GridJson} from "@/types/sg-json.types";
-
-    const gridState = namespace("GridState");
+    import toJson from "@/utils/grid-state-utils";
+    import GridState from "@/store/modules/grid-state";
 
     @Component
     export default class LoadApproxVue extends Vue {
-      @gridState.Getter
-      public gridJson!: GridJson;
-
-
       public approximateLoad() {
         const info: LoadApproxMsg = {
           type: "LoadApproximation",
-          grid: this.gridJson
+          grid: toJson((this.$store as any)._modulesNamespaceMap["GridState/"].state as GridState)
         }
 
         WS.sendMessage(info);

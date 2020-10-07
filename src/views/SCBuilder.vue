@@ -155,9 +155,6 @@
       }
 
       public download() {
-        // this.updateGridJson();
-        // const json = this.jsonVersion as GridJson;
-        // const json = this.gridJson;
         const json = toJson((this.$store as any)._modulesNamespaceMap["GridState/"].state as GridState)
         json.entities.forEach((ent: EntityJson) => {
            const nodePos: Position = this.network.getPosition(ent.id)
@@ -177,6 +174,8 @@
       }
 
       public upload(event: Event) {
+        this.nodes.clear();
+
         const file = (event.target as HTMLInputElement).files?.item(0);
         if (file !== null) {
           const reader = new FileReader();

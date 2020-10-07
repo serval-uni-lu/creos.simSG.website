@@ -293,7 +293,6 @@ export default class GridState extends VuexModule {
     @Mutation
     public updateStateConf(data: UpdateNumVal) {
         const id = this.fuseIdx.get(data.id);
-        console.log("ici")
         if(id !== undefined) {
             Vue.set(this.fusesUStatusConf, id, {conf: new ConfidenceLevel(data.newValue), fuseId: data.id});
         } else {
@@ -375,7 +374,6 @@ export default class GridState extends VuexModule {
                 value.uloads.forEach((ul: ULoadJson) => {
                     cableUloads.push(new ULoad(ul.value, ul.confidence))
                 });
-                console.log(cableUloads);
                 Vue.set(this.cablesULoads, id, {cableId: value.id, load: cableUloads})
             }
         });
@@ -390,7 +388,6 @@ export default class GridState extends VuexModule {
                 value.uloads.forEach((ul: ULoadJson) => {
                     fuseULoads.push(new ULoad(ul.value, ul.confidence))
                 });
-                console.log(fuseULoads);
                 Vue.set(this.fusesULoads, id, {cableId: value.id, load: fuseULoads})
             }
         });
