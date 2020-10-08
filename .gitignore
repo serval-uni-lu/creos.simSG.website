@@ -27,3 +27,4 @@ pnpm-debug.log*
 *.sw?
 /dumberdumber.html
 /dummy.html
+/src/assets/grids/*.json
