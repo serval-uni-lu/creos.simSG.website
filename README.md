@@ -18,7 +18,7 @@ Front end of the smart grid simulator. Should run along with the [Java backend](
 
 ## Project setup
 
-**Add the description of the reckange topology**: In order to use the real-case viewer, you need to add the Reckange grid topology from the `creos.data` repository. 
+**Add the description of the reckange topology**: In order to use the real-case viewer, you need to add the Reckange grid topology from the `creos.data` repository to the `src/assets/grids/` folder and name it `real-case.json`. 
 
 ```
 npm install
