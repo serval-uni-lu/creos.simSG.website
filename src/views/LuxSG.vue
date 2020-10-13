@@ -58,7 +58,6 @@ const inspectorState = namespace('InspectorState');
 
         public showCableLayer = false;
         public showMeterLayer = true;
-        // public cableLayer = new Array<CableMarker>();
         public cableLayer = new L.LayerGroup();
         public meterLayer = new L.LayerGroup();
         private map!: L.Map;

@@ -1,5 +1,6 @@
 import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/types/sg-json.types";
 import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, State, ULoad} from "@/ts/grid";
+import {v4 as uuidv4} from 'uuid';
 
 function extractFuses(json: GridJson, mapFuses: Map<string, Fuse>, fuseIdx: Map<string, number>, fusesStates: Array<{state: State; fuseId: string}>,
                       fusesConf: Array<{conf: ConfidenceLevel; fuseId: string}>, fusesULoads: Array<{load: Array<ULoad>; fuseId: string}>) {
@@ -42,11 +43,12 @@ function extractCables(json: GridJson, mapFuses: Map<string, Fuse>, mapCables: M
         mapCables.set(cableJson.id, cable);
 
         cableJson.meters?.forEach((meterJson: MeterJson) => {
-            const meter = new Meter(meterJson.id, meterJson.name, undefined, meterJson.location?.lat, meterJson.location?.long);
-            meterIdx.set(meterJson.id, meterCons.length);
-            meterCons.push({cons: meterJson.consumption, meterId: meterJson.id});
-            mapMeter.set(meterJson.id, meter);
-            cable.meters.set(meterJson.id, meter);
+            const meterId = (meterJson.id === undefined)? uuidv4() : meterJson.id;
+            const meter = new Meter(meterId, meterJson.name, undefined, meterJson.location?.lat, meterJson.location?.long);
+            meterIdx.set(meterId, meterCons.length);
+            meterCons.push({cons: meterJson.consumption, meterId});
+            mapMeter.set(meterId, meter);
+            cable.meters.set(meterId, meter);
         });
     });
 }
@@ -66,8 +68,9 @@ function extractEntities(json: GridJson, mapFuses: Map<string, Fuse>, mapEntitie
             fuses.push(fuse);
         });
 
-        const entity = new Entity(entJson.id, type, entJson.name, fuses, entJson.location?.lat, entJson.location?.long);
-        mapEntities.set(entJson.id, entity);
+        const entId = (entJson.id === undefined)? uuidv4() : entJson.id;
+        const entity = new Entity(entId, type, entJson.name, fuses, entJson.location?.lat, entJson.location?.long);
+        mapEntities.set(entId, entity);
 
     })
 }
