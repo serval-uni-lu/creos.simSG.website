@@ -6,7 +6,7 @@
           MeterInsp(v-for="m in getMetersData()" :key="m.id" :meterId="m.meterId")
         h4.collapseAct(v-on:click="show($event)" class="active") ULoads
         .collapsible
-            span(v-for="ul in getCableULoads()" :key="ul.id")  - {{ul.value}} A [{{ul.confidence}} %] <br/>
+            span(v-for="ul in getCableULoads()" :key="ul.id")  - {{ul.value}} A [{{ul.confidence}}] <br/>
 </template>
 
 <script lang="ts">

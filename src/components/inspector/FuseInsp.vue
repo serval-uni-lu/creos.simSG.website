@@ -15,7 +15,7 @@
                 | %
         span.title.collapseAct(v-on:click="show($event)" class="active") Load
         .collapsible
-            span(v-for="ul in uLoads()" :key="ul.id") - {{ul.value}} A [{{ul.confidence}}%] <br/>
+            span(v-for="ul in uLoads()" :key="ul.id") - {{ul.value}} A [{{ul.confidence}}] <br/>
 </template>
 
 <script lang="ts">

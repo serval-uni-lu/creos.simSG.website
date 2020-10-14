@@ -38,7 +38,7 @@ interface Fuse {
 }
 
 interface Load {
-    confidence: number;
+    confidence: number|string;
     value:      number;
 }
 

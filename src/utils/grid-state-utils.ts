@@ -80,7 +80,7 @@ export default function toJson(state: GridState): GridJson {
             jsonFuse.load = new Array<LoadJson>();
             load.forEach((ul: ULoad) => {
                 jsonFuse.load?.push({
-                    confidence: ul.confidence.level,
+                    confidence: (typeof ul.confidence === "string")? ul.confidence : ul.confidence.level,
                     value: ul.load
                 })
             })

@@ -33,7 +33,7 @@ interface ULoadMsg {
 
 interface ULoadJson {
     value: number;
-    confidence: number;
+    confidence: string;
 }
 
 export {Message, ActionListMsg, LoadApproximationAnswer, ULoadApproximationAnswer, LoadMsg, ULoadMsg, ULoadJson}

@@ -143,12 +143,16 @@ class ConfidenceLevel {
 
 class ULoad {
     load: number;
-    confidence: ConfidenceLevel;
+    confidence: ConfidenceLevel | string;
 
-    constructor(load: number, confidence?: number) {
+    constructor(load: number, confidence?: number|string) {
         this.load = load;
-        const level = (confidence===undefined)? MAX_CONF_LVL : confidence;
-        this.confidence = new ConfidenceLevel(level);
+        if(typeof confidence === "string") {
+            this.confidence = confidence;
+        } else {
+            const level = (confidence === undefined) ? MAX_CONF_LVL : confidence;
+            this.confidence = new ConfidenceLevel(level);
+        }
     }
 
     public prettyLoad(): string {
@@ -156,6 +160,9 @@ class ULoad {
     }
 
     public prettyConf(): string {
+        if(typeof this.confidence === "string") {
+            return this.confidence;
+        }
         return this.confidence.prettyConf();
     }
 
