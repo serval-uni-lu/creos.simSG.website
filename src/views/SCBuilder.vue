@@ -7,7 +7,7 @@
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addCabinet.svg" title="Add a cabinet" v-on:click="setAddSubCabinet()" v-bind:class="{active: editionIsCab}")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addCable.svg" title="Add a cable" v-on:click="setAddCable()" v-bind:class="{active: editionIsCable}")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/addMeter.svg" title="Add a meter" v-on:click="setAddMeter()" v-bind:class="{active: editionIsMeter}")
-        img.cblFuseLayer.btn.btn-secondary(:src="imageDel" :title="titleDel" class="btn btn-secondary" v-on:click="deleteElmt()" v-if="elmtSelected")
+        img.cblFuseLayer.btn.btn-secondary(:src="imageDel" :title="titleDel" v-on:click="deleteElmt()" v-if="elmtSelected")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/fitGrid.svg" title="Fit the grid in the window" class="btn btn-secondary" v-on:click="fit()")
         img.cblFuseLayer.btn.btn-secondary(src="@/assets/buttons/download.svg" title="Export the grid to a JSON file" v-on:click="download()")
         .cblFuseLayer.btn.btn-secondary
@@ -20,6 +20,11 @@
         Action#action
         .topo-builder
           #network
+          #loadingBar(v-if="showLoadingBar")
+            .outerBorder
+              #text
+              #border
+                #bar
         EditableInspector#inspector(v-if="inspVisible")
 
 
@@ -57,6 +62,8 @@
       public editionMode: TypeNode = TypeNode.NONE;
       public selection: TypeNode = TypeNode.NONE;
       public network!: Network;
+
+      public showLoadingBar = false;
 
       /**
        * Inspector state
@@ -154,6 +161,7 @@
       }
 
       public download() {
+        // eslint-disable-next-line
         const json = toJson((this.$store as any)._modulesNamespaceMap["GridState/"].state as GridState)
         json.entities.forEach((ent: EntityJson) => {
            const nodePos: Position = this.network.getPosition(ent.id)
@@ -173,6 +181,9 @@
       }
 
       public upload(event: Event) {
+        this.showLoadingBar = true;
+        console.log("called")
+
         this.nodes.clear();
 
         const file = (event.target as HTMLInputElement).files?.item(0);
@@ -245,6 +256,8 @@
             }
           }
           reader.readAsText(file as File);
+        } else {
+          this.showLoadingBar = false;
         }
       }
 
@@ -498,6 +511,42 @@
         });
 
 
+        this.network.on("stabilizationProgress", function (params) {
+          const maxWidth = 496;
+          const minWidth = 20;
+          const widthFactor = params.iterations / params.total;
+          const width = Math.max(minWidth, maxWidth * widthFactor);
+
+          const barElmt = document.getElementById("bar");
+          const textElmt = document.getElementById("text");
+
+          if(barElmt !== null && textElmt !== null) {
+            barElmt.style.width = width + "px";
+            textElmt.innerHTML = Math.round(widthFactor * 100) + "%";
+          }
+
+
+        });
+
+        this.network.once("stabilizationIterationsDone",  () => {
+
+          const barElmt = document.getElementById("bar");
+          const textElmt = document.getElementById("text");
+          const loadingBarElmt = document.getElementById("loadingBar");
+
+          if(barElmt !== null && textElmt !== null && loadingBarElmt !== null) {
+            barElmt.innerHTML = "100%";
+            textElmt.style.width = "496px";
+            loadingBarElmt.style.opacity = "0";
+
+            setTimeout(() => {
+              this.showLoadingBar = false;
+            }, 500);
+          }
+
+        });
+
+
       }
 
       public created() {
@@ -624,5 +673,107 @@
     height: 40px;
     padding: 3px;
   }
+
+
+
+    #loadingBar {
+      width: 100%;
+      height: 100%;
+      background-color: rgba(200, 200, 200, 0.8);
+      -webkit-transition: all 0.5s ease;
+      -moz-transition: all 0.5s ease;
+      -ms-transition: all 0.5s ease;
+      -o-transition: all 0.5s ease;
+      transition: all 0.5s ease;
+      opacity: 1;
+    }
+    #wrapper {
+      position: relative;
+      width: 900px;
+      height: 900px;
+    }
+
+    #text {
+      position: absolute;
+      top: 8px;
+      left: 530px;
+      width: 30px;
+      height: 50px;
+      margin: auto auto auto auto;
+      font-size: 22px;
+      color: #000000;
+    }
+
+    div.outerBorder {
+      position: relative;
+      top: 400px;
+      width: 600px;
+      height: 44px;
+      margin: auto auto auto auto;
+      border: 8px solid rgba(0, 0, 0, 0.1);
+      background: rgb(252, 252, 252); /* Old browsers */
+      background: -moz-linear-gradient(
+              top,
+              rgba(252, 252, 252, 1) 0%,
+              rgba(237, 237, 237, 1) 100%
+      ); /* FF3.6+ */
+      background: -webkit-gradient(
+              linear,
+              left top,
+              left bottom,
+              color-stop(0%, rgba(252, 252, 252, 1)),
+              color-stop(100%, rgba(237, 237, 237, 1))
+      ); /* Chrome,Safari4+ */
+      background: -webkit-linear-gradient(
+              top,
+              rgba(252, 252, 252, 1) 0%,
+              rgba(237, 237, 237, 1) 100%
+      ); /* Chrome10+,Safari5.1+ */
+      background: -o-linear-gradient(
+              top,
+              rgba(252, 252, 252, 1) 0%,
+              rgba(237, 237, 237, 1) 100%
+      ); /* Opera 11.10+ */
+      background: -ms-linear-gradient(
+              top,
+              rgba(252, 252, 252, 1) 0%,
+              rgba(237, 237, 237, 1) 100%
+      ); /* IE10+ */
+      background: linear-gradient(
+              to bottom,
+              rgba(252, 252, 252, 1) 0%,
+              rgba(237, 237, 237, 1) 100%
+      ); /* W3C */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+      border-radius: 72px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #border {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 500px;
+      height: 23px;
+      margin: auto auto auto auto;
+      box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    #bar {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 20px;
+      height: 20px;
+      margin: auto auto auto auto;
+      border-radius: 11px;
+      border: 2px solid rgba(30, 30, 30, 0.05);
+      background: rgb(0, 173, 246); /* Old browsers */
+      box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.4);
+    }
+
+
+
 
 </style>
