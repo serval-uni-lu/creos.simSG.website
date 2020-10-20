@@ -39,7 +39,7 @@
     import {namespace} from "vuex-class";
     import {Cable, Entity, EntityType, Fuse, Grid, Meter} from "@/ts/grid";
     import {ElmtType, NullSelection, Selection} from "@/utils/selection";
-    import EditableInspector from "@/components/inspector/editable/EditableInspector.vue";
+    import EditableInspector from "@/components/inspector/EditableInspector.vue";
     import GridState, {DataConnCblMeter, DataNewCable, DataNewEntity} from "@/store/modules/grid-state";
     import {CableJson, EntityJson, GridJson, MeterJson} from "@/types/sg-json.types";
     import {saveAs} from 'file-saver';

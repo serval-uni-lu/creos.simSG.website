@@ -18,6 +18,9 @@ function onmessage(event: MessageEvent) {
     console.debug("Message received: " + event.data);
 
     const message = JSON.parse(event.data) as Message
+    // ActionList is the first message sent by the server
+    // It contains the list of action the server implements
+    // The elements of this list should correspond to one action name
     if(message.type === "ActionList") {
         const setActions = new Set<string>();
         (message as ActionListMsg).actionName.forEach((name: string) => setActions.add(name));
