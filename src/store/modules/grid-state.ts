@@ -2,8 +2,8 @@ import {Module, Mutation, VuexModule} from "vuex-module-decorators";
 import {Scenario} from "@/ts/scenario";
 import {Cable, ConfidenceLevel, Entity, EntityType, Fuse, Grid, Meter, oppositeState, State, ULoad} from "@/ts/grid";
 import {Vue} from "vue-property-decorator";
-import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/types/sg-json.types";
-import {GridData, json2Grid} from "@/utils/grid-utils";
+import {CableJson, EntityJson, FuseJson, GridJson, LoadJson, MeterJson} from "@/ts/types/sg-json.types";
+import {GridData, json2Grid} from "@/ts/utils/json-importer";
 import {v4 as uuidv4} from 'uuid';
 import {
     createCabinetSc,
@@ -11,8 +11,8 @@ import {
     createParaCab,
     createParaSubs,
     createSingleCableSc
-} from "@/utils/scenario-utils";
-import {LoadMsg, ULoadJson, ULoadMsg} from "@/types/ws-message";
+} from "@/ts/utils/scenario-utils";
+import {LoadMsg, ULoadJson, ULoadMsg} from "@/ts/types/ws-message";
 
 export interface UpdateNumVal {
     id: string;

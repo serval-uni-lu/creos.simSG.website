@@ -16,7 +16,9 @@
       "mocha",
       "chai"
     ],
-    "typeRoots": ["src/types"],
+    "typeRoots": [
+      "src/ts/types"
+    ],
     "paths": {
       "@/*": [
         "src/*"

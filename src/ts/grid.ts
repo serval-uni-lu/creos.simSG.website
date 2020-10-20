@@ -1,8 +1,14 @@
-const MAX_CONF_LVL = 1;
+/**
+ * Simplification of the grid model done in creos.simsg.api
+ * (see https://github.com/UL-SnT-Serval/creos.simSG.api/tree/master/model)
+ * The model should contain just enough detail to make the viewer works properly. For example, the complexity
+ * of the uncertainty management might not appear here.
+ *
+ * WARNING: this current version is not fully aligned with the version of the server (see Issue 6 on  - creos.simsg.api
+ * https://github.com/UL-SnT-Serval/creos.simSG.api/issues/6)
+ */
 
-interface Identifiable {
-    readonly id: number;
-}
+const MAX_CONF_LVL = 1;
 
 interface Localisable {
     latitude?: number;

@@ -1,5 +1,5 @@
 import {Module, Mutation, VuexModule} from "vuex-module-decorators";
-import {NullSelection, Selection} from "@/utils/selection";
+import {NullSelection, Selection} from "@/ts/utils/selection";
 
 @Module({namespaced: true})
 class InspectorState extends VuexModule {

@@ -37,6 +37,20 @@ Front end of the smart grid simulator. Should run along with the [Java backend](
 
 The project structure follows the default structure of a [Vue.js](https://vuejs.org/) project. In this project, views are the pages accessible through the top-level of the navigation menu. The other elements are components.
 
+Folders description:
+
+- `public`: contains the css files and the index file of the website
+- `src`: all sources files
+    - `assets`: images or others resources used in the application
+    - `images`: contains the source file for the logos we created
+    - `pages`: contains the [Vue.js](https://vuejs.org/) source files
+    - `plugin`: contains the Vue.jss plugins, mainly the actionner
+    - `router`: contains the definition of the paths for our application
+    - `scss`: contains a set of SCSS files used in our application and shared by several components
+    - `store`: contains the implementation of the state management of our application ([Vuex](https://vuex.vuejs.org/))
+    - `ts`: contains all the typescript code used by the components. We put them in separate files to simplify Vue files
+    - `main.ts`: entry point of the application
+
 ## View elements
 
 We divided all views that manipulate a grid (scenario viewer, topology builder and real-case viewer) in three part: the actionner, the viewer, and the inspector. 
@@ -61,7 +75,7 @@ To add an actionner one needs to:
 - create a Vue.js file for the component. It should contain, at least, one button that triggers the action by, for example, sending a websocket message.
     - the install function should add an element to the `Vue.$actionCmp` action list that respects the `ActionData` interface
     - the name should be unique
-    - at the connection, if the server wants to use this action, it should add the name in the `ActionList` message
+    - at the connection, if the server wants to use this action, it should add the name in the `ActionListMsg` message
 - in `src/main.ts`, decalare the plugin you want to use: `Vue.use(<PLUGIN_NAME>);`
 
 Two plugins have been implemented and can be used as running example: `src/plugin/action/loadApprox` and `src/plugin/action/uLoadApprox`.
@@ -70,4 +84,14 @@ Two plugins have been implemented and can be used as running example: `src/plugi
 
 ## Web socket communication
 
-For the communication with the backend, we added a websocket.
+For the communication with the backend, we added a websocket (see `src/ws/index.ts`). 
+The connection is established at the loading phase of the WebUI. 
+**Warning**: if the server starts after the WebUI, you will have to reload the page to establish the connection.
+Currently, there is no mechanism to attempt connection regularly (see [Issue 10](https://github.com/UL-SnT-Serval/creos.simSG.website/issues/10)).
+
+At the connection, the server sends a message containing the list of all actions it implements (see `ActionListMsg` interface).
+Then, the WebUI and the server communicates using JSON formatted data.
+From the UI, the message type should implement the `Message` interface.
+It contains at least one element: the type.
+**Warning**: the type should correspond to one handled by the server. 
+Do not forget to synchronise the `MsgType` type with the new message types added in the server.

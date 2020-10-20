@@ -1,3 +1,9 @@
+/**
+ * Listing of the predefined-scenario.
+ *
+ * This listing should match the one done on creos.simsg.api
+ * (see https://github.com/UL-SnT-Serval/creos.simSG.api/tree/master/scenarios)
+ */
 export enum Scenario {
     SINGLE_CABLE, CABINET, INDIRECT_PARA, PARA_CABINET, PARA_SUBS,
 }

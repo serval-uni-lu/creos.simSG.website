@@ -7,8 +7,8 @@
 <script lang="ts">
     import {Vue, Component} from "vue-property-decorator";
     import {ApproximationType, LoadApproxMsg} from "@/plugin/action/loadApprox/load-approx-msg";
-    import * as WS from "@/ws";
-    import toJson from "@/utils/grid-state-utils";
+    import * as WS from "@/ts/ws";
+    import toJson from "@/ts/utils/grid-state-utils";
     import GridState from "@/store/modules/grid-state";
 
 

@@ -1,5 +1,5 @@
-import {Message} from "@/types/ws-message";
-import {GridJson} from "@/types/sg-json.types";
+import {Message} from "@/ts/types/ws-message";
+import {GridJson} from "@/ts/types/sg-json.types";
 
 type ApproximationType = "naive" | "bs_rule";
 

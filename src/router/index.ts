@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Home from '../views/Home.vue'
-import Scenarios from '../views/Scenarios.vue'
+import Home from '../pages/Home.vue'
+import Scenarios from '../pages/Scenarios.vue'
 
 Vue.use(VueRouter);
 
@@ -19,18 +19,18 @@ const routes: Array<RouteConfig> = [
   {
     path: '/scenario/:name',
     name: 'scview',
-    component: () => import('../views/SCView.vue'),
+    component: () => import('../pages/SCView.vue'),
     props: true
   },
   {
     path: '/scenario-builder',
     name: 'scenario-builder',
-    component: () => import('../views/SCBuilder.vue')
+    component: () => import('../pages/SCBuilder.vue')
   },
   {
     path: '/lux-sg',
     name: 'lux-sg',
-    component: () => import('../views/LuxSG.vue')
+    component: () => import('../pages/LuxSG.vue')
   }
 ];
 
