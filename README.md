@@ -39,6 +39,8 @@ The project structure follows the default structure of a [Vue.js](https://vuejs.
 
 Folders description:
 
+- `atlas`: export of the Reckange area, with zoom level 15. It has been done with [Mobile Atlas Creator](https://mobac.sourceforge.io/) to enable an offline map (not used)
+    - we did not use it as we would require a zoom level up to 18, while the tool can only export the map with a zoom level up to 15
 - `public`: contains the css files and the index file of the website
 - `src`: all sources files
     - `assets`: images or others resources used in the application
