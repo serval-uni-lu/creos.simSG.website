@@ -104,6 +104,7 @@ Schema used: ![](https://img.shields.io/badge/calver-YYYY.0M.0D-22bfda.svg)
 
 - YYYY: full year  (*e.g.,* 2006, 2016, 2106)
 - 0M: zero-padded month  (*e.g.,* 01, 02, 11, 12)
+- 0D: zero-padded day (*e.g.,* 04, 08, 25, 31)
 
 SimSG is a research prototype, mainly used by those who developed it. 
 Its main goal is to be used as demonstration tool for academic conference or in front of (potential) partners.
