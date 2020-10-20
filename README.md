@@ -95,3 +95,18 @@ From the UI, the message type should implement the `Message` interface.
 It contains at least one element: the type.
 **Warning**: the type should correspond to one handled by the server. 
 Do not forget to synchronise the `MsgType` type with the new message types added in the server.
+
+## Version schema
+
+For this project, we use the [calendar versioning schema](https://calver.org/).
+
+Schema used: ![](https://img.shields.io/badge/calver-YYYY.0M.0D-22bfda.svg)
+
+- YYYY: full year  (*e.g.,* 2006, 2016, 2106)
+- 0M: zero-padded month  (*e.g.,* 01, 02, 11, 12)
+
+SimSG is a research prototype, mainly used by those who developed it. 
+Its main goal is to be used as demonstration tool for academic conference or in front of (potential) partners.
+The version number will not be used to inform users about new features or patches fix.
+Instead, the goal was to use it as timestamp and refer them in report, academic papers, or any other written document.
+
