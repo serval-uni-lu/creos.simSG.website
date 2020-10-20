@@ -1,6 +1,6 @@
 {
   "name": "simsg-website",
-  "version": "2020.10.20",
+  "version": "2020.00.00",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
